@@ -1,0 +1,75 @@
+# Business — Generative Engine Optimization Map
+
+---
+
+## Pages
+
+### Home
+https://example.com
+Discover unbeatable deals with dollar tree online shopping at MeraGhara. Browse thousands of products, enjoy member-exclusive prices, and shop from home today!
+
+### About
+https://example.com/about
+MeraGhara brings you the best of dollar tree online shopping and premium member benefits. Learn how we're revolutionizing e-commerce with quality and savings.
+
+### Contact
+https://example.com/contact
+Need assistance with costco online shopping for members or have questions? Our dedicated support team is ready to help you shop smarter and save more every day.
+
+### Products
+https://example.com/products
+Our Products - MeraGhara
+
+### Cart
+https://example.com/cart
+Your Cart
+
+### Checkout
+https://example.com/checkout
+Checkout
+
+### Login
+https://example.com/login
+Customer Login
+
+### Account
+https://example.com/account
+My Account
+
+### Order Success
+https://example.com/order-success
+Thank you for your order
+
+### Product Detail
+https://example.com/product/:slug
+Product Details - MeraGhara
+
+### Category
+https://example.com/category/:slug
+Products - MeraGhara
+
+## Legal & Policy
+
+### Privacy Policy
+https://example.com/privacy
+Information about how user data is collected, stored, and protected.
+
+### Terms & Conditions
+https://example.com/terms
+Legal terms describing service usage, rights, and policies.
+
+### Accessibility Statement
+https://example.com/accessibility
+Information about WCAG compliance and accessibility features.
+
+---
+
+# Business Context (for LLM understanding)
+
+## About Business
+---
+
+# Additional Resources
+
+- **Sitemap**: https://example.com/sitemap.xml
+- **Robots.txt**: https://example.com/robots.txt
