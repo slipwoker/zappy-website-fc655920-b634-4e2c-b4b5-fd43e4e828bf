@@ -118,6 +118,362 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 ;
+
+
+/* Cookie Consent */
+
+// Helper function to check cookie consent
+function hasConsentFor(category) {
+  if (typeof window.CookieConsent === 'undefined') {
+    return false; // Default to no consent if cookie consent not loaded
+  }
+  
+  return window.CookieConsent.validConsent(category);
+}
+
+// Helper function to execute code only with consent
+function withConsent(category, callback) {
+  if (hasConsentFor(category)) {
+    callback();
+  } else {
+    console.log(`[WARNING] Skipping ${category} code - no user consent`);
+  }
+}
+
+// Cookie Consent Initialization
+
+(function() {
+  'use strict';
+  
+  let initAttempts = 0;
+  const maxAttempts = 50; // 5 seconds max wait
+  
+  // Wait for DOM and vanilla-cookieconsent to be ready
+  function initCookieConsent() {
+    initAttempts++;
+    
+    
+    if (typeof window.CookieConsent === 'undefined') {
+      if (initAttempts < maxAttempts) {
+        setTimeout(initCookieConsent, 100);
+      } else {
+      }
+      return;
+    }
+
+    const cc = window.CookieConsent;
+    
+    
+    // Initialize cookie consent
+    try {
+      cc.run({
+  "autoShow": true,
+  "mode": "opt-in",
+  "revision": 0,
+  "categories": {
+    "necessary": {
+      "enabled": true,
+      "readOnly": true
+    },
+    "analytics": {
+      "enabled": false,
+      "readOnly": false,
+      "autoClear": {
+        "cookies": [
+          {
+            "name": "_ga"
+          },
+          {
+            "name": "_ga_*"
+          },
+          {
+            "name": "_gid"
+          },
+          {
+            "name": "_gat"
+          }
+        ]
+      }
+    },
+    "marketing": {
+      "enabled": false,
+      "readOnly": false,
+      "autoClear": {
+        "cookies": [
+          {
+            "name": "_fbp"
+          },
+          {
+            "name": "_fbc"
+          },
+          {
+            "name": "fr"
+          }
+        ]
+      }
+    }
+  },
+  "language": {
+    "default": "en",
+    "translations": {
+      "en": {
+        "consentModal": {
+          "title": "We use cookies 🍪",
+          "description": "MeraGhara uses cookies to enhance your experience, analyze site usage, and assist in our marketing efforts. You can manage your preferences anytime.",
+          "acceptAllBtn": "Accept All",
+          "acceptNecessaryBtn": "Accept Necessary",
+          "showPreferencesBtn": "Manage Preferences",
+          "footer": "<a href=\"#privacy-policy\">Privacy Policy</a> | <a href=\"#terms-conditions\">Terms & Conditions</a>"
+        },
+        "preferencesModal": {
+          "title": "Cookie Preferences",
+          "acceptAllBtn": "Accept All",
+          "acceptNecessaryBtn": "Accept Necessary",
+          "savePreferencesBtn": "Save Preferences",
+          "closeIconLabel": "Close",
+          "sections": [
+            {
+              "title": "Essential Cookies",
+              "description": "These cookies are necessary for the website to function and cannot be disabled.",
+              "linkedCategory": "necessary"
+            },
+            {
+              "title": "Analytics Cookies",
+              "description": "These cookies help us understand how visitors interact with our website.",
+              "linkedCategory": "analytics"
+            },
+            {
+              "title": "Marketing Cookies",
+              "description": "These cookies are used to deliver personalized advertisements.",
+              "linkedCategory": "marketing"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "guiOptions": {
+    "consentModal": {
+      "layout": "box",
+      "position": "bottom right",
+      "equalWeightButtons": true,
+      "flipButtons": false
+    },
+    "preferencesModal": {
+      "layout": "box",
+      "equalWeightButtons": true,
+      "flipButtons": false
+    }
+  }
+});
+      
+      // Google Consent Mode v2 integration
+      // Update consent state based on accepted cookie categories
+      function updateGoogleConsentMode() {
+        if (typeof gtag !== 'function') {
+          // Define gtag if not already defined (needed for consent updates)
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function(){dataLayer.push(arguments);};
+        }
+        
+        var analyticsAccepted = cc.acceptedCategory('analytics');
+        var marketingAccepted = cc.acceptedCategory('marketing');
+        
+        gtag('consent', 'update', {
+          'analytics_storage': analyticsAccepted ? 'granted' : 'denied',
+          'ad_storage': marketingAccepted ? 'granted' : 'denied',
+          'ad_user_data': marketingAccepted ? 'granted' : 'denied',
+          'ad_personalization': marketingAccepted ? 'granted' : 'denied'
+        });
+      }
+      
+      // Update consent on initial load (if user previously accepted)
+      updateGoogleConsentMode();
+      
+      // Handle consent changes via onChange callback
+      if (typeof cc.onChange === 'function') {
+        cc.onChange(function(cookie, changed_preferences) {
+          updateGoogleConsentMode();
+        });
+      }
+
+      // Note: Cookie Preferences button removed per marketing guidelines
+      // Footer should be clean and minimal - users can manage cookies via banner
+    } catch (error) {
+    }
+  }
+
+  // Initialize when DOM is ready - multiple approaches for reliability
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+    // Backup timeout in case DOMContentLoaded doesn't fire
+    setTimeout(initCookieConsent, 1000);
+  } else if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initCookieConsent();
+  } else {
+    // Fallback - try after a short delay
+    setTimeout(initCookieConsent, 500);
+  }
+  
+  // Additional fallback - try after page load
+  if (typeof window !== 'undefined') {
+    if (window.addEventListener) {
+      window.addEventListener('load', initCookieConsent, { once: true });
+    }
+  }
+})();
+
+/* Accessibility Features */
+
+/* Mickidum Accessibility Toolbar Initialization - Zappy Style */
+
+window.onload = function() {
+    
+    try {
+        window.micAccessTool = new MicAccessTool({
+            buttonPosition: 'left', // Position on left side
+            forceLang: 'en-US', // Force language
+            icon: {
+                position: {
+                    bottom: { size: 50, units: 'px' },
+                    left: { size: 20, units: 'px' },
+                    type: 'fixed'
+                },
+                backgroundColor: 'transparent', // Transparent to allow CSS styling
+                color: 'transparent', // Let CSS handle coloring
+                img: 'accessible',
+                circular: false // Square button for consistent styling
+            },
+            menu: {
+                dimensions: {
+                    width: { size: 300, units: 'px' },
+                    height: { size: 'auto', units: 'px' }
+                }
+            }
+        });
+        
+    } catch (error) {
+    }
+    
+    // Keyboard shortcut handler: ALT+A (Option+A on Mac) to toggle accessibility widget visibility (desktop only)
+    document.addEventListener('keydown', function(event) {
+        // Check if ALT+A is pressed (ALT on Windows/Linux, Option on Mac)
+        var isAltOrOption = event.altKey;
+        // Use event.code for reliable physical key detection (works regardless of Option key character output)
+        var isAKey = event.code === 'KeyA' || event.keyCode === 65 || event.which === 65 || 
+                      (event.key && (event.key.toLowerCase() === 'a' || event.key === 'å' || event.key === 'Å'));
+        
+        if (isAltOrOption && isAKey) {
+            // Only work on desktop (screen width > 768px)
+            if (window.innerWidth > 768) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Toggle visibility class on body
+                var isVisible = document.body.classList.contains('accessibility-widget-visible');
+                
+                if (isVisible) {
+                    // Hide the widget
+                    document.body.classList.remove('accessibility-widget-visible');
+                } else {
+                    // Show the widget
+                    document.body.classList.add('accessibility-widget-visible');
+                    
+                    // After a short delay, click the button to open the menu
+                    setTimeout(function() {
+                        var accessButton = document.getElementById('mic-access-tool-general-button');
+                        if (accessButton) {
+                            accessButton.click();
+                        }
+                    }, 200);
+                }
+            }
+        }
+    }, true);
+};
+
+
+// Zappy Contact Form API Integration (Fallback)
+(function() {
+    if (window.zappyContactFormLoaded) {
+        console.log('📧 Zappy contact form already loaded');
+        return;
+    }
+    window.zappyContactFormLoaded = true;
+
+    function initContactFormIntegration() {
+        console.log('📧 Zappy: Initializing contact form API integration...');
+
+        // Find the contact form (try multiple selectors for flexibility)
+        const contactForm = document.querySelector('.contact-form') || 
+                           document.querySelector('form[action*="contact"]') ||
+                           document.querySelector('form#contact') ||
+                           document.querySelector('form#contactForm') ||
+                           document.getElementById('contactForm') ||
+                           document.querySelector('section.contact form') ||
+                           document.querySelector('section#contact form') ||
+                           document.querySelector('form');
+        
+        if (!contactForm) {
+            console.log('⚠️ Zappy: No contact form found on page');
+            return;
+        }
+        
+        console.log('✅ Zappy: Contact form found:', contactForm.className || contactForm.id || 'unnamed form');
+
+        // Store original submit handler if exists
+        const originalOnSubmit = contactForm.onsubmit;
+
+    // Add Zappy API integration using capture phase to run before other handlers
+    contactForm.addEventListener('submit', async function(e) {
+        // Get form data
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        // Send to Zappy backend API (don't prevent default, let other handlers run)
+        try {
+            console.log('📧 Zappy: Sending contact form to backend API...');
+            const response = await fetch('https://api.zappy5.com/api/email/contact-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    websiteId: 'fc655920-b634-4e2c-b4b5-fd43e4e828bf',
+                    name: data.name || '',
+                    email: data.email || '',
+                    subject: data.subject || 'Contact Form Submission',
+                    message: data.message || '',
+                    phone: data.phone || null
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('✅ Zappy: Contact form data sent successfully to backend');
+            } else {
+                console.log('⚠️ Zappy: Backend returned error:', result.error);
+            }
+        } catch (error) {
+            console.error('❌ Zappy: Failed to send to backend API:', error);
+            // Don't break the existing form submission
+        }
+        }, true); // Use capture phase to run before other handlers
+
+        console.log('✅ Zappy: Contact form API integration initialized');
+    } // End of initContactFormIntegration
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initContactFormIntegration);
+    } else {
+        // DOM is already ready, initialize immediately
+        initContactFormIntegration();
+    }
+})();
+
+;
 /* ==ZAPPY E-COMMERCE JS START== */
 // E-commerce functionality
 (function() {
@@ -231,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!websiteId) return;
   
   // Translations
-  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
+  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","saveToFavorites":"Save to Favorites","removeFromFavorites":"Remove from Favorites","shareProduct":"Share Product","linkCopied":"Link copied!","myFavorites":"My Favorites","noFavorites":"No favorites yet","addedToFavorites":"Added to favorites","removedFromFavorites":"Removed from favorites","loginToFavorite":"Log in to save favorites","browseFavorites":"Discover all our products","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
   
   // Helper to get localized e-commerce UI text
   // Tries zappyI18n first for multilingual support, falls back to static t object
@@ -279,6 +635,12 @@ function stripHtmlToText(html) {
   let vatRate = 0.18; // Default fallback (Israel VAT rate as of January 2025)
   let productLayout = 'standard'; // Default product card layout
   let storeSettingsFetched = false;
+  let sidebarFiltersConfig = {};
+  let sortingConfig = {};
+  let viewToggleEnabled = true;
+  let currentSortKey = 'popularity';
+  let currentViewMode = localStorage.getItem('zappy_view_mode_' + websiteId) || 'grid';
+  let activeSidebarFilters = { categories: [], brands: [], tags: [], priceMin: null, priceMax: null, sale: false };
   
   // Fetch store settings (including tax rate and product layout) from API
   async function fetchStoreSettings() {
@@ -292,6 +654,15 @@ function stripHtmlToText(html) {
         }
         if (data.data.productLayout) {
           productLayout = data.data.productLayout;
+        }
+        if (data.data.sidebarFiltersConfig) {
+          sidebarFiltersConfig = data.data.sidebarFiltersConfig;
+        }
+        if (data.data.sortingConfig) {
+          sortingConfig = data.data.sortingConfig;
+        }
+        if (data.data.viewToggleEnabled != null) {
+          viewToggleEnabled = data.data.viewToggleEnabled;
         }
         storeSettingsFetched = true;
       }
@@ -435,7 +806,7 @@ function stripHtmlToText(html) {
   
   // Store loaded products for filtering
   var productsCache = [];
-  var currentFilter = 'all';
+  var currentFilter = 'all'; // kept for legacy compat, not used with sidebar filters
   
   // Load products on products page (uses public storefront API)
   // This is called on page load - delegates to loadProductsWithFilter
@@ -529,33 +900,365 @@ function stripHtmlToText(html) {
       
       // Store all products for client-side filtering
       productsCache = data.data;
-      
-      // Apply filter
-      var productsToShow = productsCache;
-      if (currentFilter === 'featured') {
-        productsToShow = productsCache.filter(function(p) { return p.is_featured; });
-      } else if (currentFilter === 'sale') {
-        productsToShow = productsCache.filter(function(p) { 
-          return p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price); 
-        });
-      } else if (currentFilter === 'new') {
-        // Show products with "new" tag (manual only)
-        productsToShow = productsCache.filter(function(p) { 
-          return p.tags && p.tags.some(function(tag) { 
-            return tag.toLowerCase() === 'new' || tag.toLowerCase() === 'חדש'; 
-          });
-        });
+
+      // Initialize toolbar, sidebar, sorting, and view toggle on first load
+      if (!window._zappyToolbarInitialized) {
+        window._zappyToolbarInitialized = true;
+        initProductsToolbar('products-toolbar', 'product-sidebar', 'sort-select', 'sort-control', 'view-toggle', 'sidebar-toggle-btn', 'products-count');
       }
-      
-      if (productsToShow.length === 0) {
-        grid.innerHTML = '<div class="empty-cart">' + t.noProducts + '</div>';
-        return;
-      }
-      
-      renderProductsToGrid(grid, productsToShow);
+
+      applyAllFiltersAndRender(grid);
+      if (typeof _syncCardFavorites === 'function') _syncCardFavorites();
     } catch (e) {
       console.error('Failed to load products', e);
       grid.innerHTML = '<div class="empty-cart">' + t.errorLoading + '</div>';
+    }
+  }
+  
+  // Central filtering + sorting + render pipeline
+  function applyAllFiltersAndRender(grid) {
+    if (!grid) grid = document.getElementById('zappy-product-grid');
+    if (!grid) return;
+    
+    var productsToShow = productsCache.slice();
+    
+    // Apply sidebar filters
+    if (sidebarFiltersConfig.enabled) {
+      if (activeSidebarFilters.categories.length > 0) {
+        productsToShow = productsToShow.filter(function(p) {
+          return activeSidebarFilters.categories.includes(p.category_id);
+        });
+      }
+      if (activeSidebarFilters.brands && activeSidebarFilters.brands.length > 0) {
+        productsToShow = productsToShow.filter(function(p) {
+          return p.brand && activeSidebarFilters.brands.includes(p.brand);
+        });
+      }
+      if (activeSidebarFilters.tags.length > 0) {
+        productsToShow = productsToShow.filter(function(p) {
+          return p.tags && p.tags.some(function(tag) {
+            return activeSidebarFilters.tags.includes(tag);
+          });
+        });
+      }
+      if (activeSidebarFilters.priceMin != null) {
+        productsToShow = productsToShow.filter(function(p) {
+          return parseFloat(p.price) >= activeSidebarFilters.priceMin;
+        });
+      }
+      if (activeSidebarFilters.priceMax != null) {
+        productsToShow = productsToShow.filter(function(p) {
+          return parseFloat(p.price) <= activeSidebarFilters.priceMax;
+        });
+      }
+      if (activeSidebarFilters.sale) {
+        productsToShow = productsToShow.filter(function(p) {
+          return p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price);
+        });
+      }
+    }
+    
+    // Step 3: Apply sorting
+    if (currentSortKey && currentSortKey !== 'default') {
+      productsToShow = productsToShow.slice().sort(function(a, b) {
+        switch (currentSortKey) {
+          case 'popularity': return (parseInt(b.purchase_count) || 0) - (parseInt(a.purchase_count) || 0);
+          case 'price_asc': return parseFloat(a.price) - parseFloat(b.price);
+          case 'price_desc': return parseFloat(b.price) - parseFloat(a.price);
+          case 'name_asc': return (a.name || '').localeCompare(b.name || '');
+          case 'name_desc': return (b.name || '').localeCompare(a.name || '');
+          case 'newest': return new Date(b.created_at) - new Date(a.created_at);
+          default: return 0;
+        }
+      });
+    }
+    
+    // Update count
+    var countEl = document.getElementById('products-count');
+    if (countEl) {
+      var countLabel = isRTL ? (productsToShow.length + ' מוצרים') : ('Showing ' + productsToShow.length + ' products');
+      countEl.textContent = countLabel;
+    }
+    
+    if (productsToShow.length === 0) {
+      grid.innerHTML = '<div class="empty-cart">' + t.noProducts + '</div>';
+      return;
+    }
+    
+    renderProductsToGrid(grid, productsToShow);
+  }
+  
+  // Initialize toolbar (sorting, view toggle, sidebar toggle, count)
+  function initProductsToolbar(toolbarId, sidebarId, sortSelectId, sortControlId, viewToggleId, sidebarToggleBtnId, countId) {
+    var toolbar = document.getElementById(toolbarId);
+    if (!toolbar) return;
+    
+    var hasAnyFeature = false;
+    
+    // Sorting
+    if (sortingConfig.enabled && sortingConfig.options && sortingConfig.options.length > 0) {
+      hasAnyFeature = true;
+      var sortControl = document.getElementById(sortControlId);
+      var sortSelect = document.getElementById(sortSelectId);
+      if (sortControl && sortSelect) {
+        sortControl.style.display = '';
+        var sortLabels = {
+          popularity: isRTL ? 'פופולריות' : 'Popularity',
+          price_asc: isRTL ? 'מחיר: נמוך לגבוה' : 'Price: Low to High',
+          price_desc: isRTL ? 'מחיר: גבוה לנמוך' : 'Price: High to Low',
+          name_asc: isRTL ? 'שם: א-ת' : 'Name: A to Z',
+          name_desc: isRTL ? 'שם: ת-א' : 'Name: Z to A',
+          newest: isRTL ? 'חדש ביותר' : 'Newest First'
+        };
+        var sortOrder = ['popularity', 'price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest'];
+        sortOrder.forEach(function(opt) {
+          if (sortingConfig.options.includes(opt) && sortLabels[opt]) {
+            var option = document.createElement('option');
+            option.value = opt;
+            option.textContent = sortLabels[opt];
+            sortSelect.appendChild(option);
+          }
+        });
+        sortSelect.value = currentSortKey;
+        sortSelect.addEventListener('change', function() {
+          currentSortKey = sortSelect.value;
+          applyAllFiltersAndRender();
+        });
+      }
+    }
+    
+    // View toggle
+    if (viewToggleEnabled) {
+      hasAnyFeature = true;
+      var viewToggle = document.getElementById(viewToggleId);
+      if (viewToggle) {
+        viewToggle.style.display = '';
+        var viewBtns = viewToggle.querySelectorAll('.view-btn');
+        viewBtns.forEach(function(btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-view') === currentViewMode);
+          btn.addEventListener('click', function() {
+            currentViewMode = btn.getAttribute('data-view');
+            localStorage.setItem('zappy_view_mode_' + websiteId, currentViewMode);
+            viewBtns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-view') === currentViewMode); });
+            applyAllFiltersAndRender();
+          });
+        });
+      }
+    }
+    
+    // Sidebar filters
+    if (sidebarFiltersConfig.enabled && sidebarFiltersConfig.filters && sidebarFiltersConfig.filters.length > 0) {
+      hasAnyFeature = true;
+      initSidebarFilters(sidebarId, sidebarToggleBtnId);
+    }
+    
+    if (hasAnyFeature) {
+      toolbar.style.display = '';
+    }
+  }
+  
+  function buildPriceRanges(prices) {
+    if (!prices || prices.length === 0) return [];
+    var minP = Math.min.apply(null, prices);
+    var maxP = Math.max.apply(null, prices);
+    if (minP === maxP) return [];
+    var range = maxP - minP;
+    var step;
+    if (range <= 50) step = 10;
+    else if (range <= 200) step = 25;
+    else if (range <= 500) step = 50;
+    else if (range <= 1000) step = 100;
+    else if (range <= 5000) step = 500;
+    else step = 1000;
+    var bucketStart = Math.floor(minP / step) * step;
+    var buckets = [];
+    while (bucketStart < maxP) {
+      var bucketEnd = bucketStart + step;
+      var count = prices.filter(function(p) { return p >= bucketStart && p < bucketEnd; }).length;
+      if (bucketStart + step >= maxP) {
+        count = prices.filter(function(p) { return p >= bucketStart; }).length;
+      }
+      if (count > 0) {
+        buckets.push({ min: bucketStart, max: bucketEnd, count: count });
+      }
+      bucketStart = bucketEnd;
+    }
+    return buckets;
+  }
+
+  function formatPrice(val) {
+    return val % 1 === 0 ? val.toString() : val.toFixed(2);
+  }
+
+  // Build and initialize the sidebar filters
+  function initSidebarFilters(sidebarId, toggleBtnId) {
+    var sidebar = document.getElementById(sidebarId);
+    if (!sidebar) return;
+    
+    var filters = sidebarFiltersConfig.filters || [];
+    var html = '';
+    var currency = isRTL ? '₪' : '$';
+    
+    // Sidebar header with title, clear button, and mobile close button
+    html += '<div class="sidebar-header"><span class="sidebar-title">' + (isRTL ? 'סינון' : 'Filters') + '</span>';
+    html += '<div class="sidebar-header-actions">';
+    html += '<button class="sidebar-clear-btn" id="' + sidebarId + '-clear" title="' + (isRTL ? 'נקה הכל' : 'Clear all') + '">' + (isRTL ? 'נקה הכל' : 'Clear all') + '</button>';
+    html += '<button class="sidebar-mobile-close" id="' + sidebarId + '-mobile-close" title="' + (isRTL ? 'סגור' : 'Close') + '">&times;</button>';
+    html += '</div></div>';
+    
+    // Category filter
+    if (filters.includes('category')) {
+      var categories = {};
+      productsCache.forEach(function(p) {
+        if (p.category_id && p.category_name) {
+          if (!categories[p.category_id]) categories[p.category_id] = { name: p.category_name, count: 0 };
+          categories[p.category_id].count++;
+        }
+      });
+      var catKeys = Object.keys(categories);
+      if (catKeys.length > 0) {
+        html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'קטגוריות' : 'Categories') + '</div>';
+        catKeys.forEach(function(catId) {
+          html += '<label class="sidebar-item"><input type="checkbox" data-filter="category" value="' + catId + '"> ' + categories[catId].name + ' <span class="count">(' + categories[catId].count + ')</span></label>';
+        });
+        html += '</div>';
+      }
+    }
+    
+    // Brand filter
+    if (filters.includes('brand')) {
+      var brandCounts = {};
+      productsCache.forEach(function(p) {
+        if (p.brand) {
+          brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1;
+        }
+      });
+      var brandKeys = Object.keys(brandCounts);
+      if (brandKeys.length > 0) {
+        brandKeys.sort();
+        html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'מותג' : 'Brand') + '</div>';
+        brandKeys.forEach(function(brand) {
+          html += '<label class="sidebar-item"><input type="checkbox" data-filter="brand" value="' + brand + '"> ' + brand + ' <span class="count">(' + brandCounts[brand] + ')</span></label>';
+        });
+        html += '</div>';
+      }
+    }
+    
+    // Tags filter
+    if (filters.includes('tags')) {
+      var tagCounts = {};
+      productsCache.forEach(function(p) {
+        if (p.tags && p.tags.length) {
+          p.tags.forEach(function(tag) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          });
+        }
+      });
+      var tagKeys = Object.keys(tagCounts);
+      if (tagKeys.length > 0) {
+        tagKeys.sort();
+        html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'תגיות' : 'Tags') + '</div>';
+        tagKeys.forEach(function(tag) {
+          html += '<label class="sidebar-item"><input type="checkbox" data-filter="tag" value="' + tag + '"> ' + tag + ' <span class="count">(' + tagCounts[tag] + ')</span></label>';
+        });
+        html += '</div>';
+      }
+    }
+    
+    // Price range filter (dynamic buckets)
+    if (filters.includes('price')) {
+      var prices = productsCache.map(function(p) { return parseFloat(p.price) || 0; }).filter(function(v) { return v > 0; });
+      var buckets = buildPriceRanges(prices);
+      if (buckets.length > 0) {
+        html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'טווח מחירים' : 'Price Range') + '</div>';
+        buckets.forEach(function(b, i) {
+          var label = currency + formatPrice(b.min) + ' – ' + currency + formatPrice(b.max);
+          html += '<label class="sidebar-item"><input type="radio" name="' + sidebarId + '-price-range" data-filter="price-range" data-min="' + b.min + '" data-max="' + b.max + '" value="' + i + '"> ' + label + ' <span class="count">(' + b.count + ')</span></label>';
+        });
+        html += '</div>';
+      }
+    }
+    
+    // Sale filter
+    if (filters.includes('sale')) {
+      var saleCount = productsCache.filter(function(p) { return p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price); }).length;
+      if (saleCount > 0) {
+        html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'מבצעים' : 'On Sale') + '</div>';
+        html += '<label class="sidebar-item"><input type="checkbox" data-filter="sale"> ' + (isRTL ? 'הצג מוצרים במבצע' : 'Show sale items') + ' <span class="count">(' + saleCount + ')</span></label>';
+        html += '</div>';
+      }
+    }
+    
+    sidebar.innerHTML = html;
+    sidebar.style.display = '';
+    
+    // Mobile toggle
+    var toggleBtn = document.getElementById(toggleBtnId);
+    var overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    overlay.id = sidebarId + '-overlay';
+    sidebar.parentNode.insertBefore(overlay, sidebar);
+    
+    if (toggleBtn) {
+      toggleBtn.style.display = '';
+      toggleBtn.addEventListener('click', function() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+      });
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+    overlay.addEventListener('click', closeSidebar);
+    var mobileCloseBtn = document.getElementById(sidebarId + '-mobile-close');
+    if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeSidebar);
+    
+    // Category/tag checkbox handlers
+    sidebar.querySelectorAll('input[data-filter="category"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        activeSidebarFilters.categories = Array.from(sidebar.querySelectorAll('input[data-filter="category"]:checked')).map(function(el) { return el.value; });
+        applyAllFiltersAndRender();
+      });
+    });
+    sidebar.querySelectorAll('input[data-filter="brand"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        activeSidebarFilters.brands = Array.from(sidebar.querySelectorAll('input[data-filter="brand"]:checked')).map(function(el) { return el.value; });
+        applyAllFiltersAndRender();
+      });
+    });
+    sidebar.querySelectorAll('input[data-filter="tag"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        activeSidebarFilters.tags = Array.from(sidebar.querySelectorAll('input[data-filter="tag"]:checked')).map(function(el) { return el.value; });
+        applyAllFiltersAndRender();
+      });
+    });
+    sidebar.querySelectorAll('input[data-filter="sale"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        activeSidebarFilters.sale = cb.checked;
+        applyAllFiltersAndRender();
+      });
+    });
+    
+    // Price range radio handlers
+    sidebar.querySelectorAll('input[data-filter="price-range"]').forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        activeSidebarFilters.priceMin = parseFloat(radio.getAttribute('data-min'));
+        activeSidebarFilters.priceMax = parseFloat(radio.getAttribute('data-max'));
+        applyAllFiltersAndRender();
+      });
+    });
+    
+    // Clear all
+    var clearEl = document.getElementById(sidebarId + '-clear');
+    if (clearEl) {
+      clearEl.addEventListener('click', function() {
+        activeSidebarFilters = { categories: [], brands: [], tags: [], priceMin: null, priceMax: null, sale: false };
+        sidebar.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
+        sidebar.querySelectorAll('input[type="radio"]').forEach(function(rb) { rb.checked = false; });
+        applyAllFiltersAndRender();
+      });
     }
   }
   
@@ -601,8 +1304,10 @@ function stripHtmlToText(html) {
   
   // Render products to grid
   function renderProductsToGrid(grid, products) {
-    // Update grid class based on layout
-    grid.className = 'product-grid layout-' + productLayout;
+    // Update grid class based on layout + view mode
+    var viewClass = currentViewMode === 'list' ? ' view-list' : '';
+    grid.className = 'product-grid layout-' + productLayout + viewClass;
+    grid.setAttribute('data-zappy-auto-grid', 'true');
     
     grid.innerHTML = products.map(function(p) {
       // Check if price should be displayed (default to true if not set)
@@ -656,55 +1361,54 @@ function stripHtmlToText(html) {
       var pricePerUnitHtml = getPricePerUnitHtml(p);
       var priceHtml = showPrice ? '<div class="price">' + displayPrice + '</div>' + pricePerUnitHtml : '';
       
+      var favBtnHtml = '<button class="card-favorite-btn" data-product-id="' + p.id + '" onclick="event.preventDefault(); event.stopPropagation(); toggleCardFavorite(this, \'' + p.id + '\')" title="Save to favorites"><svg class="heart-outline" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M14.7917 0.833C12.705 0.833 10.811 2.376 10 4.462C9.189 2.375 7.295 0.833 5.208 0.833C2.337 0.833 0 3.17 0 6.042C0 11.675 8.128 17.767 9.758 18.93L10 19.104L10.243 18.93C11.873 17.767 20 11.674 20 6.042C20 3.17 17.663 0.833 14.792 0.833ZM10 18.078C5.716 14.965 0.833 10.019 0.833 6.042C0.833 3.629 2.796 1.667 5.208 1.667C7.498 1.667 9.583 4.05 9.583 6.667H10.417C10.417 4.05 12.502 1.667 14.792 1.667C17.204 1.667 19.167 3.629 19.167 6.042C19.167 10.019 14.284 14.965 10 18.078Z" fill="currentColor"/></svg><svg class="heart-filled" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path d="M14.7917 0.833C12.705 0.833 10.811 2.376 10 4.462C9.189 2.375 7.295 0.833 5.208 0.833C2.337 0.833 0 3.17 0 6.042C0 11.675 8.128 17.767 9.758 18.93L10 19.104L10.243 18.93C11.873 17.767 20 11.674 20 6.042C20 3.17 17.663 0.833 14.792 0.833Z" fill="#e74c3c"/></svg></button>';
+
       if (productLayout === 'compact') {
-        // Compact: image, name, price only
         cardContent = tagsHtml +
           '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
             imageHtml +
-            '<h3>' + p.name + '</h3>' +
-            priceHtml +
-          '</a>';
+            '<div class="card-content">' +
+              '<h3>' + p.name + '</h3>' +
+              priceHtml +
+            '</div>' +
+          '</a>' +
+          favBtnHtml;
       } else if (productLayout === 'detailed') {
-        // Detailed: image, name, full description, price, action button
-        // Strip HTML from rich text description and let CSS line-clamp handle truncation
         var detailedDesc = stripHtmlToText(p.description || '');
-        // In catalog mode, show "View Details" link instead of "Add to Cart" button
         var actionButton = isCatalogMode
           ? '<a href="/product/' + (p.slug || p.id) + '" class="add-to-cart view-details-btn">' + localizedViewDetails + '</a>'
           : '<button class="add-to-cart" onclick="event.stopPropagation(); window.zappyHandleAddToCart(' + JSON.stringify(p).replace(/"/g, '&quot;') + ')">' + localizedAddToCart + '</button>';
         cardContent = tagsHtml +
           '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
             imageHtml +
-            '<h3>' + p.name + '</h3>' +
-            '<p>' + detailedDesc + '</p>' +
-            priceHtml +
+            '<div class="card-content">' +
+              '<h3>' + p.name + '</h3>' +
+              '<p>' + detailedDesc + '</p>' +
+              priceHtml +
+            '</div>' +
           '</a>' +
-          actionButton;
+          actionButton +
+          favBtnHtml;
       } else {
-        // Standard (default): image, name, short description, price
-        // Strip HTML from rich text description and let CSS line-clamp handle truncation
         var standardDesc = stripHtmlToText(p.description || '');
         cardContent = tagsHtml +
           '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
             imageHtml +
-            '<h3>' + p.name + '</h3>' +
-            '<p>' + standardDesc + '</p>' +
-            priceHtml +
-          '</a>';
+            '<div class="card-content">' +
+              '<h3>' + p.name + '</h3>' +
+              '<p>' + standardDesc + '</p>' +
+              priceHtml +
+            '</div>' +
+          '</a>' +
+          favBtnHtml;
       }
       
       return '<div class="product-card ' + productLayout + '" data-product-id="' + p.id + '">' + cardContent + '</div>';
     }).join('');
   }
   
-  // Initialize filter buttons
   function initFilterButtons() {
-    document.querySelectorAll('.filter-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var filter = btn.getAttribute('data-category');
-        loadProductsWithFilter(filter);
-      });
-    });
+    // Legacy filter buttons removed - sidebar filters handle all filtering
   }
   
   // Render cart drawer (slide-out panel)
@@ -1260,7 +1964,8 @@ function stripHtmlToText(html) {
             shippingMethodName: selectedShipping.name || 'משלוח',
             cart: cart,
             couponCode: appliedCoupon ? appliedCoupon.code : null,
-            couponDiscount: couponDiscount
+            couponDiscount: couponDiscount,
+            paymentMethodId: selectedPaymentMethod ? selectedPaymentMethod.id : null
           })
         });
         
@@ -3381,6 +4086,63 @@ function stripHtmlToText(html) {
       }
     }
     
+    // Load favorites
+    loadCustomerFavorites();
+
+    async function loadCustomerFavorites() {
+      var favLoading = document.getElementById('favorites-loading');
+      var favEmpty = document.getElementById('favorites-empty');
+      var favGrid = document.getElementById('favorites-grid');
+      if (!favLoading || !favGrid) return;
+
+      try {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+        var res = await fetch(buildApiUrl('/api/ecommerce/customers/me/favorites?websiteId=' + encodeURIComponent(websiteId)), {
+          headers: { 'Authorization': 'Bearer ' + token },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        favLoading.style.display = 'none';
+
+        if (!data.success || !data.data || data.data.length === 0) {
+          if (favEmpty) favEmpty.style.display = 'block';
+          return;
+        }
+
+        favGrid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;';
+        favGrid.innerHTML = data.data.map(function(p) {
+          var imgSrc = '';
+          if (p.images) {
+            try {
+              var imgs = typeof p.images === 'string' ? JSON.parse(p.images) : p.images;
+              imgSrc = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : '';
+            } catch(e) {}
+          }
+          var displayPrice = p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price)
+            ? t.currency + parseFloat(p.sale_price).toFixed(2) + ' <span style="text-decoration:line-through;color:var(--text-secondary,#6b7280);font-weight:400;font-size:0.8em;">' + t.currency + parseFloat(p.price).toFixed(2) + '</span>'
+            : t.currency + parseFloat(p.price).toFixed(2);
+
+          return '<div class="favorite-card" style="background:transparent;border:1px solid var(--border-color,rgba(128,128,128,0.2));border-radius:12px;overflow:hidden;position:relative;transition:box-shadow 0.2s;" data-product-id="' + p.id + '">' +
+            '<button class="favorite-remove-btn" style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(128,128,128,0.3);color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:2;line-height:1;" onclick="removeFavoriteFromAccount(\'' + p.id + '\', this)" title="' + (t.removeFromFavorites || 'Remove') + '">&times;</button>' +
+            '<a href="/product/' + (p.slug || p.id) + '" style="text-decoration:none;color:inherit;display:block;">' +
+              (imgSrc ? '<img src="' + imgSrc + '" alt="' + (p.name || '').replace(/'/g, '&apos;') + '" style="width:100%;aspect-ratio:1;object-fit:contain;display:block;border-radius:8px 8px 0 0;">' : '<div style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#999;font-size:32px;">📦</div>') +
+              '<div style="padding:12px;">' +
+                '<h4 style="font-size:0.875rem;font-weight:500;color:var(--text-color,var(--text,inherit));margin:0 0 6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.name || '') + '</h4>' +
+                '<div style="font-weight:600;color:var(--primary-color,var(--primary,inherit));font-size:0.9rem;">' + displayPrice + '</div>' +
+              '</div>' +
+            '</a>' +
+          '</div>';
+        }).join('');
+      } catch (error) {
+        console.error('Failed to load favorites:', error);
+        favLoading.style.display = 'none';
+        if (favEmpty) favEmpty.style.display = 'block';
+      }
+    }
+
     // Load orders
     loadCustomerOrders();
     
@@ -3460,6 +4222,31 @@ function stripHtmlToText(html) {
       }
     }
   }
+
+  window.removeFavoriteFromAccount = function(productId, btnEl) {
+    var tokenKey = 'zappy_customer_token_' + websiteId;
+    var tkn = localStorage.getItem(tokenKey);
+    if (!tkn) return;
+    var card = btnEl.closest('.favorite-card');
+    if (card) card.style.opacity = '0.5';
+
+    fetch(buildApiUrl('/api/ecommerce/customers/me/favorites/' + productId + '?websiteId=' + encodeURIComponent(websiteId)), {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + tkn }
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success && card) {
+        card.remove();
+        var grid = document.getElementById('favorites-grid');
+        if (grid && grid.children.length === 0) {
+          grid.style.display = 'none';
+          var empty = document.getElementById('favorites-empty');
+          if (empty) empty.style.display = 'block';
+        }
+      }
+    }).catch(function() {
+      if (card) card.style.opacity = '1';
+    });
+  };
   
   // Update header auth state
   function updateHeaderAuthState() {
@@ -3479,6 +4266,16 @@ function stripHtmlToText(html) {
       // User is not logged in - redirect account links to login page
       accountLinks.forEach(function(link) {
         link.href = '/login';
+        link.addEventListener('click', function() {
+          var currentPath = window.location.pathname + window.location.search;
+          var currentUrl = window.location.href;
+          if (currentUrl.includes('/api/website/preview')) {
+            var pageParam = new URLSearchParams(window.location.search).get('page') || '/';
+            sessionStorage.setItem('zappy_login_return', pageParam);
+          } else if (currentPath !== '/login') {
+            sessionStorage.setItem('zappy_login_return', currentPath);
+          }
+        });
       });
     }
   }
@@ -3659,7 +4456,15 @@ function buildApiUrlWithLang(path) {
 // Store settings for this section
 let additionalJsProductLayout = 'standard';
 let additionalJsSettingsFetched = false;
-let additionalJsAllProductsLabel = null; // Custom "All Products" label from store settings
+let additionalJsAllProductsLabel = null;
+let additionalJsSidebarFiltersConfig = {};
+let additionalJsSortingConfig = {};
+let additionalJsViewToggleEnabled = true;
+let catCurrentSortKey = 'popularity';
+let catCurrentViewMode = localStorage.getItem('zappy_view_mode_' + (window.ZAPPY_WEBSITE_ID || '')) || 'grid';
+let catActiveSidebarFilters = { categories: [], brands: [], tags: [], priceMin: null, priceMax: null, sale: false };
+let catCurrentFilter = 'all';
+let catProductsCache = [];
 
 // Fetch store settings (announcement bar, product layout, etc.)
 // Pass force=true to bypass the cache and re-fetch (e.g., when language changes)
@@ -3702,6 +4507,15 @@ async function fetchAdditionalJsSettings(force) {
           productsDropdown.appendChild(document.createTextNode(data.data.productsMenuLabel + ' '));
           if (arrowSvg) productsDropdown.appendChild(arrowSvg);
         }
+      }
+      if (data.data.sidebarFiltersConfig) {
+        additionalJsSidebarFiltersConfig = data.data.sidebarFiltersConfig;
+      }
+      if (data.data.sortingConfig) {
+        additionalJsSortingConfig = data.data.sortingConfig;
+      }
+      if (data.data.viewToggleEnabled != null) {
+        additionalJsViewToggleEnabled = data.data.viewToggleEnabled;
       }
       // Handle dynamic announcement bar
       handleDynamicAnnouncementBar(data.data.announcementBar);
@@ -3844,7 +4658,7 @@ async function loadFeaturedProducts() {
   // Ensure store settings are loaded first (for productLayout)
   await fetchAdditionalJsSettings();
   
-  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
+  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","saveToFavorites":"Save to Favorites","removeFromFavorites":"Remove from Favorites","shareProduct":"Share Product","linkCopied":"Link copied!","myFavorites":"My Favorites","noFavorites":"No favorites yet","addedToFavorites":"Added to favorites","removedFromFavorites":"Removed from favorites","loginToFavorite":"Log in to save favorites","browseFavorites":"Discover all our products","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
   
   try {
     // Only fetch featured products - no fallback, with language support
@@ -3938,11 +4752,13 @@ function stripHtmlToText(html) {
 }
 
 
-function renderProductGrid(grid, products, t, isFeaturedSection) {
+function renderProductGrid(grid, products, t, isFeaturedSection, viewMode) {
   // Update grid class based on layout (only for product grids, not featured section which has its own styling)
   var layout = additionalJsProductLayout || 'standard';
   if (!isFeaturedSection) {
-    grid.className = 'product-grid layout-' + layout;
+    var viewClass = (viewMode === 'list') ? ' view-list' : '';
+    grid.className = 'product-grid layout-' + layout + viewClass;
+    grid.setAttribute('data-zappy-auto-grid', 'true');
   }
   
   // Get localized text for UI elements
@@ -4000,73 +4816,123 @@ function renderProductGrid(grid, products, t, isFeaturedSection) {
     var pricePerUnitHtml = getPricePerUnitHtml(p);
     var priceHtml = showPrice ? '<div class="price">' + displayPrice + '</div>' + pricePerUnitHtml : '';
     
+    var favBtnHtml = '<button class="card-favorite-btn" data-product-id="' + p.id + '" onclick="event.preventDefault(); event.stopPropagation(); toggleCardFavorite(this, \'' + p.id + '\')" title="Save to favorites"><svg class="heart-outline" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M14.7917 0.833C12.705 0.833 10.811 2.376 10 4.462C9.189 2.375 7.295 0.833 5.208 0.833C2.337 0.833 0 3.17 0 6.042C0 11.675 8.128 17.767 9.758 18.93L10 19.104L10.243 18.93C11.873 17.767 20 11.674 20 6.042C20 3.17 17.663 0.833 14.792 0.833ZM10 18.078C5.716 14.965 0.833 10.019 0.833 6.042C0.833 3.629 2.796 1.667 5.208 1.667C7.498 1.667 9.583 4.05 9.583 6.667H10.417C10.417 4.05 12.502 1.667 14.792 1.667C17.204 1.667 19.167 3.629 19.167 6.042C19.167 10.019 14.284 14.965 10 18.078Z" fill="currentColor"/></svg><svg class="heart-filled" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path d="M14.7917 0.833C12.705 0.833 10.811 2.376 10 4.462C9.189 2.375 7.295 0.833 5.208 0.833C2.337 0.833 0 3.17 0 6.042C0 11.675 8.128 17.767 9.758 18.93L10 19.104L10.243 18.93C11.873 17.767 20 11.674 20 6.042C20 3.17 17.663 0.833 14.792 0.833Z" fill="#e74c3c"/></svg></button>';
+
     if (layout === 'compact') {
-      // Compact: image, name, price only
       cardContent = tagsHtml +
         '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
           imageHtml +
-          '<h3>' + p.name + '</h3>' +
-          priceHtml +
-        '</a>';
+          '<div class="card-content">' +
+            '<h3>' + p.name + '</h3>' +
+            priceHtml +
+          '</div>' +
+        '</a>' +
+        favBtnHtml;
     } else if (layout === 'detailed') {
-      // Detailed: image, name, full description, price, action button
-      // Strip HTML from rich text description and let CSS line-clamp handle truncation
       var detailedDesc = stripHtmlToText(p.description || '');
-      // In catalog mode, show "View Details" link instead of "Add to Cart" button
       var actionButton = isCatalogMode
         ? '<a href="/product/' + (p.slug || p.id) + '" class="add-to-cart view-details-btn">' + localizedViewDetails + '</a>'
         : '<button class="add-to-cart" onclick="event.stopPropagation(); window.zappyHandleAddToCart(' + JSON.stringify(p).replace(/"/g, '&quot;') + ')">' + localizedAddToCart + '</button>';
       cardContent = tagsHtml +
         '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
           imageHtml +
-          '<h3>' + p.name + '</h3>' +
-          '<p>' + detailedDesc + '</p>' +
-          priceHtml +
+          '<div class="card-content">' +
+            '<h3>' + p.name + '</h3>' +
+            '<p>' + detailedDesc + '</p>' +
+            priceHtml +
+          '</div>' +
         '</a>' +
-        actionButton;
+        actionButton +
+        favBtnHtml;
     } else {
-      // Standard (default): image, name, short description, price
-      // Strip HTML from rich text description and let CSS line-clamp handle truncation
       var standardDesc = stripHtmlToText(p.description || '');
       cardContent = tagsHtml +
         '<a href="/product/' + (p.slug || p.id) + '" class="product-card-link">' +
           imageHtml +
-          '<h3>' + p.name + '</h3>' +
-          '<p>' + standardDesc + '</p>' +
-          priceHtml +
-        '</a>';
+          '<div class="card-content">' +
+            '<h3>' + p.name + '</h3>' +
+            '<p>' + standardDesc + '</p>' +
+            priceHtml +
+          '</div>' +
+        '</a>' +
+        favBtnHtml;
     }
     
     return '<div class="product-card ' + layout + '" data-product-id="' + p.id + '">' + cardContent + '</div>';
   }).join('');
 }
 
-// Load categories into catalog dropdown
+// Load categories into catalog dropdown, respecting parent/child hierarchy
 async function loadCatalogCategories() {
     const list = document.getElementById('zappy-category-links');
     const navList = document.getElementById('zappy-nav-category-links');
     if (!list && !navList) return;
-  const websiteId = window.ZAPPY_WEBSITE_ID;
+  var websiteId = window.ZAPPY_WEBSITE_ID;
   if (!websiteId) return;
   
   try {
-    const res = await fetch(buildApiUrlWithLang('/api/ecommerce/storefront/categories?websiteId=' + websiteId));
-    const data = await res.json();
+    var res = await fetch(buildApiUrlWithLang('/api/ecommerce/storefront/categories?websiteId=' + websiteId));
+    var data = await res.json();
     if (!data.success || !data.data?.length) return;
-    
-    // Use SEO-friendly slug URLs for categories, fallback to id for backward compatibility
-    const dropdownItemsHtml = data.data.map(cat => {
-      const categoryUrl = '/category/' + (cat.slug || cat.id);
-      return '<li data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '"><a href="' + categoryUrl + '">' + cat.name + '</a></li>';
+
+    var allCats = data.data;
+    var childrenMap = {};
+    var topLevel = [];
+    allCats.forEach(function(cat) {
+      if (cat.parent_id) {
+        if (!childrenMap[cat.parent_id]) childrenMap[cat.parent_id] = [];
+        childrenMap[cat.parent_id].push(cat);
+      } else {
+        topLevel.push(cat);
+      }
+    });
+
+    // Flatten descendants so grandchildren+ appear under their top-level ancestor
+    function collectDescendants(parentId) {
+      var result = [];
+      var direct = childrenMap[parentId] || [];
+      direct.forEach(function(child) {
+        result.push(child);
+        result = result.concat(collectDescendants(child.id));
+      });
+      return result;
+    }
+    topLevel.forEach(function(cat) {
+      childrenMap[cat.id] = collectDescendants(cat.id);
+    });
+
+    function catUrl(cat) { return '/category/' + (cat.slug || cat.id); }
+    var chevronSvg = '<svg class="catalog-menu-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+    // Build HTML for the main nav dropdown (flat list with parent/child classes)
+    var dropdownItemsHtml = topLevel.map(function(cat) {
+      var children = childrenMap[cat.id] || [];
+      if (children.length === 0) {
+        return '<li data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '"><a href="' + catUrl(cat) + '">' + cat.name + '</a></li>';
+      }
+      var items = '<li class="zappy-nav-parent" data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '"><a href="' + catUrl(cat) + '">' + cat.name + '</a></li>';
+      children.forEach(function(child) {
+        items += '<li class="zappy-nav-child" data-category-id="' + child.id + '" data-category-slug="' + (child.slug || '') + '"><a href="' + catUrl(child) + '">' + child.name + '</a></li>';
+      });
+      return items;
     }).join('');
 
-    const barItemsHtml = data.data.map(cat => {
-      const categoryUrl = '/category/' + (cat.slug || cat.id);
-      return '<a href="' + categoryUrl + '" class="catalog-menu-item" data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '">' + cat.name + '</a>';
+    // Build HTML for the secondary catalog bar (flat links / dropdowns)
+    var barItemsHtml = topLevel.map(function(cat) {
+      var children = childrenMap[cat.id] || [];
+      if (children.length === 0) {
+        return '<a href="' + catUrl(cat) + '" class="catalog-menu-item" data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '">' + cat.name + '</a>';
+      }
+      var subLinks = children.map(function(child) {
+        return '<a href="' + catUrl(child) + '" class="catalog-menu-item" data-category-id="' + child.id + '" data-category-slug="' + (child.slug || '') + '">' + child.name + '</a>';
+      }).join('');
+      return '<div class="catalog-menu-parent" data-category-id="' + cat.id + '" data-category-slug="' + (cat.slug || '') + '">' +
+        '<a href="' + catUrl(cat) + '" class="catalog-menu-item catalog-menu-trigger">' + cat.name + ' ' + chevronSvg + '</a>' +
+        '<div class="sub-menu">' + subLinks + '</div>' +
+      '</div>';
     }).join('');
 
     if (navList) {
-      // Remove any previously injected category items
       navList.querySelectorAll('li[data-category-id]').forEach(function(node) { node.remove(); });
       navList.insertAdjacentHTML('beforeend', dropdownItemsHtml);
     }
@@ -4114,12 +4980,56 @@ function handleSubNavbarVisibility() {
   }
 }
 
+// Transparent navbar scroll effect — frosted glass on scroll
+// Activates only when --nav-bg is 'transparent' (set by navbar customization)
+function initTransparentNavbarScrollEffect() {
+  var nb = document.querySelector('nav.navbar, .navbar:not(.zappy-catalog-menu)');
+  if (!nb) return;
+  var cs = getComputedStyle(nb);
+  var bgc = cs.backgroundColor;
+  // Check if navbar background is transparent (rgba(0,0,0,0) or 'transparent')
+  var isTransparent = bgc === 'transparent' || bgc === 'rgba(0, 0, 0, 0)';
+  if (!isTransparent) return;
+
+  var cm = document.querySelector('.zappy-catalog-menu');
+  // Determine frosted glass color from the page background
+  var bodyBg = getComputedStyle(document.body).backgroundColor || 'rgb(0,0,0)';
+  var m = bodyBg.match(/\d+/g);
+  var frostedBg = m && m.length >= 3 ? 'rgba(' + m[0] + ',' + m[1] + ',' + m[2] + ',0.85)' : 'rgba(0,0,0,0.85)';
+  var threshold = 60;
+
+  nb.style.transition = 'background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease, box-shadow 0.3s ease';
+  if (cm) cm.style.transition = 'background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease';
+
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+    if (y > threshold) {
+      nb.style.background = frostedBg;
+      nb.style.backdropFilter = 'blur(12px)';
+      nb.style.webkitBackdropFilter = 'blur(12px)';
+      nb.style.boxShadow = '0 2px 16px rgba(0,0,0,0.12)';
+      if (cm) { cm.style.background = frostedBg; cm.style.backdropFilter = 'blur(12px)'; cm.style.webkitBackdropFilter = 'blur(12px)'; }
+    } else {
+      nb.style.background = 'transparent';
+      nb.style.backdropFilter = 'none';
+      nb.style.webkitBackdropFilter = 'none';
+      nb.style.boxShadow = 'none';
+      if (cm) { cm.style.background = 'transparent'; cm.style.backdropFilter = 'none'; cm.style.webkitBackdropFilter = 'none'; }
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
+
 // Initialize featured products, categories, and product/category page details on load
 document.addEventListener('DOMContentLoaded', function() {
   // Mobile menu is handled by the main navbar script - no separate e-commerce handler needed
   
   // Hide sub-navbars on product/checkout/order pages
   handleSubNavbarVisibility();
+
+  // Activate frosted glass scroll effect for transparent navbars
+  initTransparentNavbarScrollEffect();
 
   // Fetch store settings first (handles announcement bar, product layout, etc.)
   fetchAdditionalJsSettings();
@@ -4219,7 +5129,7 @@ async function loadProductDetailPage() {
   const websiteId = window.ZAPPY_WEBSITE_ID;
   if (!websiteId) return;
   
-  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
+  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","saveToFavorites":"Save to Favorites","removeFromFavorites":"Remove from Favorites","shareProduct":"Share Product","linkCopied":"Link copied!","myFavorites":"My Favorites","noFavorites":"No favorites yet","addedToFavorites":"Added to favorites","removedFromFavorites":"Removed from favorites","loginToFavorite":"Log in to save favorites","browseFavorites":"Discover all our products","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
   
   // Get slug from URL - check both pathname and query parameter (preview mode)
   let pagePath = window.location.pathname;
@@ -4272,7 +5182,7 @@ async function loadCategoryPage() {
   const websiteId = window.ZAPPY_WEBSITE_ID;
   if (!websiteId) return;
   
-  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
+  const t = {"products":"Products","ourProducts":"Our Products","featuredProducts":"Featured Products","noFeaturedProducts":"No featured products yet. Check out all our products!","featuredCategories":"Shop by Category","all":"All","featured":"Featured","new":"New","sale":"Sale","loadingProducts":"Loading products...","cart":"Cart","yourCart":"Your Cart","emptyCart":"Cart is empty","total":"Total","proceedToCheckout":"Proceed to Checkout","checkout":"Checkout","customerInfo":"Customer Info","fullName":"Full Name","email":"Email","phone":"Phone","shippingAddress":"Shipping Address","street":"Street Address","apartment":"Apt, Floor, Unit","city":"City","zip":"ZIP Code","saveAddressForNextTime":"Save this address for next time","shippingMethod":"Shipping Method","loadingShipping":"Loading shipping methods...","payment":"Payment","loadingPayment":"Loading payment options...","orderSummary":"Order Summary","subtotal":"Subtotal","vat":"VAT","vatIncluded":"VAT Included","shipping":"Shipping","discount":"Discount","totalToPay":"Total","placeOrder":"Place Order","login":"Login","customerLogin":"Customer Login","enterEmail":"Enter your email and we'll send you a login code","emailAddress":"Email Address","sendCode":"Send Code","enterCode":"Enter the code sent to your email","verificationCode":"Verification Code","verify":"Verify","returnPolicy":"Return Policy","addToCart":"Add to Cart","startingAt":"Starting at","addedToCart":"Product added to cart!","remove":"Remove","noProducts":"No products to display","errorLoading":"Error loading","days":"days","currency":"$","free":"FREE","freeAbove":"Free above","noShippingMethods":"No shipping options available","viewAllResults":"View all results","searchProducts":"Search products","productDetails":"Product Details","viewDetails":"View Details","inStock":"In Stock","outOfStock":"Out of Stock","pleaseSelect":"Please select","sku":"SKU","category":"Category","relatedProducts":"Related Products","productNotFound":"Product not found","backToProducts":"Back to Products","home":"Home","quantity":"Quantity","unitLabels":{"piece":"pcs","kg":"kg","gram":"g","liter":"L","ml":"ml"},"perUnit":"/","couponCode":"Coupon Code","enterCouponCode":"Enter coupon code","applyCoupon":"Apply","removeCoupon":"Remove","couponApplied":"Coupon applied successfully!","invalidCoupon":"Invalid coupon code","couponExpired":"Coupon has expired","couponMinOrder":"Minimum order amount","alreadyHaveAccount":"Already have an account?","loginHere":"Login here","loggedInAs":"Logged in as:","logout":"Logout","haveCouponCode":"I have a coupon code","agreeToTerms":"I agree to the","termsAndConditions":"Terms and Conditions","pleaseAcceptTerms":"Please accept the terms and conditions","nameRequired":"Please enter your full name","emailRequired":"Please enter your email address","emailInvalid":"Please enter a valid email address","phoneRequired":"Please enter your phone number","shippingRequired":"Please select a shipping method","streetRequired":"Please enter your street address","cityRequired":"Please enter your city","cartEmpty":"Your cart is empty","paymentNotConfigured":"Online payment not configured","orderSuccess":"Order Received!","thankYouOrder":"Thank you for your order","orderNumber":"Order Number","orderConfirmation":"A confirmation email has been sent to you","orderProcessing":"Your order is being processed. We'll notify you when it ships.","continueShopping":"Continue Shopping","next":"Next","contactInformation":"Contact Information","items":"Items","continueToHomePage":"Continue to Home Page","transactionDate":"Transaction Date","paymentMethod":"Payment Method","orderDetails":"Order Details","loadingOrder":"Loading order details...","orderNotFound":"Order not found","orderItems":"Order Items","paidAmount":"Amount Paid","myAccount":"My Account","accountWelcome":"Welcome","yourOrders":"Your Orders","noOrders":"No orders yet","orderDate":"Date","orderStatus":"Status","orderTotal":"Total","viewOrder":"View Order","statusPending":"Pending Payment","statusPaid":"Paid","statusProcessing":"Processing","statusShipped":"Shipped","statusDelivered":"Delivered","statusCancelled":"Cancelled","notLoggedIn":"Not Logged In","pleaseLogin":"Please login to view your account","personalDetails":"Personal Details","editProfile":"Edit Profile","name":"Name","saveChanges":"Save Changes","cancel":"Cancel","addresses":"Addresses","addAddress":"Add Address","editAddress":"Edit Address","deleteAddress":"Delete Address","setAsDefault":"Set as Default","defaultAddress":"Default Address","addressLabel":"Address Label","work":"Work","other":"Other","noAddresses":"No saved addresses","confirmDelete":"Are you sure you want to delete?","profileUpdated":"Profile updated successfully","addressSaved":"Address saved successfully","addressDeleted":"Address deleted","saving":"Saving...","saveToFavorites":"Save to Favorites","removeFromFavorites":"Remove from Favorites","shareProduct":"Share Product","linkCopied":"Link copied!","myFavorites":"My Favorites","noFavorites":"No favorites yet","addedToFavorites":"Added to favorites","removedFromFavorites":"Removed from favorites","loginToFavorite":"Log in to save favorites","browseFavorites":"Discover all our products","selectVariant":"Select option","variantUnavailable":"Unavailable","color":"Color","size":"Size","material":"Material","style":"Style","weight":"Weight","capacity":"Capacity","length":"Length","inquiryAbout":"Inquiry about","sendInquiry":"Send Inquiry","callNow":"Call Now","specifications":"Specifications","businessPhone":"[business_phone]","businessEmail":"[business_email]"};
   
   // Get slug from URL - check both pathname and query parameter (preview mode)
   let pagePath = window.location.pathname;
@@ -4365,6 +5275,7 @@ function showCategoryNotFound(container, t) {
 function renderCategoryPage(container, category, t) {
   const headerContainer = document.getElementById('category-header');
   const productGrid = document.getElementById('zappy-category-products');
+  const isRTL = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
   
   // Render category header
   if (headerContainer) {
@@ -4375,55 +5286,315 @@ function renderCategoryPage(container, category, t) {
   }
   
   // Store category products for filtering
-  const categoryProducts = category.products || [];
+  catProductsCache = category.products || [];
   
-  // Render products in this category
-  if (productGrid) {
-    if (categoryProducts.length === 0) {
-      productGrid.innerHTML = '<div class="no-products">' + (t.noProducts || 'No products in this category yet.') + '</div>';
-    } else {
-      renderProductGrid(productGrid, categoryProducts, t, false);
+  // Initialize category toolbar
+  initCategoryToolbar(isRTL, t);
+
+  applyCategoryFiltersAndRender(productGrid, t);
+  if (typeof _syncCardFavorites === 'function') _syncCardFavorites();
+}
+
+function applyCategoryFiltersAndRender(productGrid, t) {
+  if (!productGrid) productGrid = document.getElementById('zappy-category-products');
+  if (!productGrid) return;
+  
+  var productsToShow = catProductsCache.slice();
+  
+  // Apply sidebar filters
+  if (additionalJsSidebarFiltersConfig.enabled) {
+    if (catActiveSidebarFilters.brands && catActiveSidebarFilters.brands.length > 0) {
+      productsToShow = productsToShow.filter(function(p) {
+        return p.brand && catActiveSidebarFilters.brands.includes(p.brand);
+      });
+    }
+    if (catActiveSidebarFilters.tags.length > 0) {
+      productsToShow = productsToShow.filter(function(p) {
+        return p.tags && p.tags.some(function(tag) { return catActiveSidebarFilters.tags.includes(tag); });
+      });
+    }
+    if (catActiveSidebarFilters.priceMin != null) {
+      productsToShow = productsToShow.filter(function(p) { return parseFloat(p.price) >= catActiveSidebarFilters.priceMin; });
+    }
+    if (catActiveSidebarFilters.priceMax != null) {
+      productsToShow = productsToShow.filter(function(p) { return parseFloat(p.price) <= catActiveSidebarFilters.priceMax; });
+    }
+    if (catActiveSidebarFilters.sale) {
+      productsToShow = productsToShow.filter(function(p) { return p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price); });
     }
   }
   
-  // Setup filter buttons for category products (same as products page)
-  const filterBtns = container.querySelectorAll('.filter-btn');
-  filterBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      // Update active state
-      filterBtns.forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      
-      const filterType = btn.getAttribute('data-category');
-      let filteredProducts = categoryProducts;
-      
-      if (filterType === 'featured') {
-        filteredProducts = categoryProducts.filter(function(p) { return p.is_featured; });
-      } else if (filterType === 'new') {
-        filteredProducts = categoryProducts.filter(function(p) { 
-          return p.tags && p.tags.some(function(tag) { 
-            return tag.toLowerCase() === 'new' || tag.toLowerCase() === 'חדש'; 
-          }); 
-        });
-      } else if (filterType === 'sale') {
-        filteredProducts = categoryProducts.filter(function(p) { 
-          return (p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price)) ||
-                 (p.tags && p.tags.some(function(tag) { 
-                   return tag.toLowerCase() === 'sale' || tag.toLowerCase() === 'מבצע'; 
-                 }));
-        });
-      }
-      // 'all' shows all products
-      
-      if (productGrid) {
-        if (filteredProducts.length === 0) {
-          productGrid.innerHTML = '<div class="no-products">' + (t.noProducts || 'No products found.') + '</div>';
-        } else {
-          renderProductGrid(productGrid, filteredProducts, t, false);
-        }
+  // Apply sorting
+  if (catCurrentSortKey && catCurrentSortKey !== 'default') {
+    productsToShow = productsToShow.slice().sort(function(a, b) {
+      switch (catCurrentSortKey) {
+        case 'popularity': return (parseInt(b.purchase_count) || 0) - (parseInt(a.purchase_count) || 0);
+        case 'price_asc': return parseFloat(a.price) - parseFloat(b.price);
+        case 'price_desc': return parseFloat(b.price) - parseFloat(a.price);
+        case 'name_asc': return (a.name || '').localeCompare(b.name || '');
+        case 'name_desc': return (b.name || '').localeCompare(a.name || '');
+        case 'newest': return new Date(b.created_at) - new Date(a.created_at);
+        default: return 0;
       }
     });
+  }
+  
+  // Update count
+  var countEl = document.getElementById('category-products-count');
+  var isRTL = document.documentElement.dir === 'rtl' || document.body.dir === 'rtl';
+  if (countEl) {
+    countEl.textContent = isRTL ? (productsToShow.length + ' מוצרים') : ('Showing ' + productsToShow.length + ' products');
+  }
+  
+  if (productsToShow.length === 0) {
+    productGrid.innerHTML = '<div class="no-products">' + (t.noProducts || 'No products found.') + '</div>';
+    return;
+  }
+  
+  renderProductGrid(productGrid, productsToShow, t, false, catCurrentViewMode);
+}
+
+function initCategoryToolbar(isRTL, t) {
+  var toolbar = document.getElementById('category-toolbar');
+  if (!toolbar) return;
+  
+  var hasAnyFeature = false;
+  
+  // Sorting
+  if (additionalJsSortingConfig.enabled && additionalJsSortingConfig.options && additionalJsSortingConfig.options.length > 0) {
+    hasAnyFeature = true;
+    var sortControl = document.getElementById('cat-sort-control');
+    var sortSelect = document.getElementById('cat-sort-select');
+    if (sortControl && sortSelect) {
+      sortControl.style.display = '';
+      var sortLabels = {
+        popularity: isRTL ? 'פופולריות' : 'Popularity',
+        price_asc: isRTL ? 'מחיר: נמוך לגבוה' : 'Price: Low to High',
+        price_desc: isRTL ? 'מחיר: גבוה לנמוך' : 'Price: High to Low',
+        name_asc: isRTL ? 'שם: א-ת' : 'Name: A to Z',
+        name_desc: isRTL ? 'שם: ת-א' : 'Name: Z to A',
+        newest: isRTL ? 'חדש ביותר' : 'Newest First'
+      };
+      var catSortOrder = ['popularity', 'price_asc', 'price_desc', 'name_asc', 'name_desc', 'newest'];
+      catSortOrder.forEach(function(opt) {
+        if (additionalJsSortingConfig.options.includes(opt) && sortLabels[opt]) {
+          var option = document.createElement('option');
+          option.value = opt;
+          option.textContent = sortLabels[opt];
+          sortSelect.appendChild(option);
+        }
+      });
+      sortSelect.addEventListener('change', function() {
+        catCurrentSortKey = sortSelect.value;
+        applyCategoryFiltersAndRender(null, t);
+      });
+    }
+  }
+  
+  // View toggle
+  if (additionalJsViewToggleEnabled) {
+    hasAnyFeature = true;
+    var viewToggle = document.getElementById('cat-view-toggle');
+    if (viewToggle) {
+      viewToggle.style.display = '';
+      var viewBtns = viewToggle.querySelectorAll('.view-btn');
+      viewBtns.forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-view') === catCurrentViewMode);
+        btn.addEventListener('click', function() {
+          catCurrentViewMode = btn.getAttribute('data-view');
+          localStorage.setItem('zappy_view_mode_' + (window.ZAPPY_WEBSITE_ID || ''), catCurrentViewMode);
+          viewBtns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-view') === catCurrentViewMode); });
+          applyCategoryFiltersAndRender(null, t);
+        });
+      });
+    }
+  }
+  
+  // Sidebar filters (tags, price, sale - not categories since we're already in a category)
+  if (additionalJsSidebarFiltersConfig.enabled && additionalJsSidebarFiltersConfig.filters && additionalJsSidebarFiltersConfig.filters.length > 0) {
+    hasAnyFeature = true;
+    initCategorySidebarFilters(isRTL, t);
+  }
+  
+  if (hasAnyFeature) {
+    toolbar.style.display = '';
+  }
+}
+
+function catBuildPriceRanges(prices) {
+  if (!prices || prices.length === 0) return [];
+  var minP = Math.min.apply(null, prices);
+  var maxP = Math.max.apply(null, prices);
+  if (minP === maxP) return [];
+  var range = maxP - minP;
+  var step;
+  if (range <= 50) step = 10;
+  else if (range <= 200) step = 25;
+  else if (range <= 500) step = 50;
+  else if (range <= 1000) step = 100;
+  else if (range <= 5000) step = 500;
+  else step = 1000;
+  var bucketStart = Math.floor(minP / step) * step;
+  var buckets = [];
+  while (bucketStart < maxP) {
+    var bucketEnd = bucketStart + step;
+    var count = prices.filter(function(p) { return p >= bucketStart && p < bucketEnd; }).length;
+    if (bucketStart + step >= maxP) {
+      count = prices.filter(function(p) { return p >= bucketStart; }).length;
+    }
+    if (count > 0) {
+      buckets.push({ min: bucketStart, max: bucketEnd, count: count });
+    }
+    bucketStart = bucketEnd;
+  }
+  return buckets;
+}
+
+function catFormatPrice(val) {
+  return val % 1 === 0 ? val.toString() : val.toFixed(2);
+}
+
+function initCategorySidebarFilters(isRTL, t) {
+  var sidebar = document.getElementById('category-sidebar');
+  if (!sidebar) return;
+  
+  var filters = (additionalJsSidebarFiltersConfig.filters || []).filter(function(f) { return f !== 'category'; });
+  if (filters.length === 0) return;
+  var currency = isRTL ? '₪' : '$';
+  
+  var html = '';
+
+  // Sidebar header with title, clear button, and mobile close button
+  html += '<div class="sidebar-header"><span class="sidebar-title">' + (isRTL ? 'סינון' : 'Filters') + '</span>';
+  html += '<div class="sidebar-header-actions">';
+  html += '<button class="sidebar-clear-btn" id="category-sidebar-clear" title="' + (isRTL ? 'נקה הכל' : 'Clear all') + '">' + (isRTL ? 'נקה הכל' : 'Clear all') + '</button>';
+  html += '<button class="sidebar-mobile-close" id="category-sidebar-mobile-close" title="' + (isRTL ? 'סגור' : 'Close') + '">&times;</button>';
+  html += '</div></div>';
+  
+  // Brand filter
+  if (filters.includes('brand')) {
+    var brandCounts = {};
+    catProductsCache.forEach(function(p) {
+      if (p.brand) { brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1; }
+    });
+    var brandKeys = Object.keys(brandCounts);
+    if (brandKeys.length > 0) {
+      brandKeys.sort();
+      html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'מותג' : 'Brand') + '</div>';
+      brandKeys.forEach(function(brand) {
+        html += '<label class="sidebar-item"><input type="checkbox" data-filter="brand" value="' + brand + '"> ' + brand + ' <span class="count">(' + brandCounts[brand] + ')</span></label>';
+      });
+      html += '</div>';
+    }
+  }
+  
+  // Tags filter
+  if (filters.includes('tags')) {
+    var tagCounts = {};
+    catProductsCache.forEach(function(p) {
+      if (p.tags && p.tags.length) {
+        p.tags.forEach(function(tag) { tagCounts[tag] = (tagCounts[tag] || 0) + 1; });
+      }
+    });
+    var tagKeys = Object.keys(tagCounts);
+    if (tagKeys.length > 0) {
+      tagKeys.sort();
+      html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'תגיות' : 'Tags') + '</div>';
+      tagKeys.forEach(function(tag) {
+        html += '<label class="sidebar-item"><input type="checkbox" data-filter="tag" value="' + tag + '"> ' + tag + ' <span class="count">(' + tagCounts[tag] + ')</span></label>';
+      });
+      html += '</div>';
+    }
+  }
+  
+  // Price range filter (dynamic buckets)
+  if (filters.includes('price')) {
+    var prices = catProductsCache.map(function(p) { return parseFloat(p.price) || 0; }).filter(function(v) { return v > 0; });
+    var buckets = catBuildPriceRanges(prices);
+    if (buckets.length > 0) {
+      html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'טווח מחירים' : 'Price Range') + '</div>';
+      buckets.forEach(function(b, i) {
+        var label = currency + catFormatPrice(b.min) + ' – ' + currency + catFormatPrice(b.max);
+        html += '<label class="sidebar-item"><input type="radio" name="cat-sidebar-price-range" data-filter="price-range" data-min="' + b.min + '" data-max="' + b.max + '" value="' + i + '"> ' + label + ' <span class="count">(' + b.count + ')</span></label>';
+      });
+      html += '</div>';
+    }
+  }
+  
+  // Sale filter
+  if (filters.includes('sale')) {
+    var saleCount = catProductsCache.filter(function(p) { return p.sale_price && parseFloat(p.sale_price) < parseFloat(p.price); }).length;
+    if (saleCount > 0) {
+      html += '<div class="sidebar-section"><div class="sidebar-section-title">' + (isRTL ? 'מבצעים' : 'On Sale') + '</div>';
+      html += '<label class="sidebar-item"><input type="checkbox" data-filter="sale"> ' + (isRTL ? 'הצג מוצרים במבצע' : 'Show sale items') + ' <span class="count">(' + saleCount + ')</span></label>';
+      html += '</div>';
+    }
+  }
+  
+  sidebar.innerHTML = html;
+  sidebar.style.display = '';
+  
+  // Mobile toggle
+  var toggleBtn = document.getElementById('cat-sidebar-toggle-btn');
+  var overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  overlay.id = 'category-sidebar-overlay';
+  sidebar.parentNode.insertBefore(overlay, sidebar);
+  
+  if (toggleBtn) {
+    toggleBtn.style.display = '';
+    toggleBtn.addEventListener('click', function() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+    });
+  }
+  
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+  }
+  overlay.addEventListener('click', closeSidebar);
+  var catMobileCloseBtn = document.getElementById('category-sidebar-mobile-close');
+  if (catMobileCloseBtn) catMobileCloseBtn.addEventListener('click', closeSidebar);
+  
+  // Event handlers
+  sidebar.querySelectorAll('input[data-filter="brand"]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      catActiveSidebarFilters.brands = Array.from(sidebar.querySelectorAll('input[data-filter="brand"]:checked')).map(function(el) { return el.value; });
+      applyCategoryFiltersAndRender(null, t);
+    });
   });
+  sidebar.querySelectorAll('input[data-filter="tag"]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      catActiveSidebarFilters.tags = Array.from(sidebar.querySelectorAll('input[data-filter="tag"]:checked')).map(function(el) { return el.value; });
+      applyCategoryFiltersAndRender(null, t);
+    });
+  });
+  sidebar.querySelectorAll('input[data-filter="sale"]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      catActiveSidebarFilters.sale = cb.checked;
+      applyCategoryFiltersAndRender(null, t);
+    });
+  });
+  
+  // Price range radio handlers
+  sidebar.querySelectorAll('input[data-filter="price-range"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      catActiveSidebarFilters.priceMin = parseFloat(radio.getAttribute('data-min'));
+      catActiveSidebarFilters.priceMax = parseFloat(radio.getAttribute('data-max'));
+      applyCategoryFiltersAndRender(null, t);
+    });
+  });
+  
+  var clearEl = document.getElementById('category-sidebar-clear');
+  if (clearEl) {
+    clearEl.addEventListener('click', function() {
+      catActiveSidebarFilters = { categories: [], brands: [], tags: [], priceMin: null, priceMax: null, sale: false };
+      sidebar.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
+      sidebar.querySelectorAll('input[type="radio"]').forEach(function(rb) { rb.checked = false; });
+      applyCategoryFiltersAndRender(null, t);
+    });
+  }
 }
 
 function showProductNotFound(container, t) {
@@ -4573,7 +5744,19 @@ function renderProductDetail(container, product, t) {
         ` : ''}
       </div>
       <div class="product-info">
-        <h1>${product.name}</h1>
+        <div class="product-title-row">
+          <h1>${product.name}</h1>
+          <div class="product-icon-actions">
+            <button class="icon-btn favorite-btn" id="favorite-btn" onclick="toggleFavorite('${product.id}')" title="${t.saveToFavorites}">
+              <svg class="heart-outline" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><g clip-path="url(#clip0_fav)"><path d="M14.7917 0.833496C12.705 0.833496 10.8108 2.376 10 4.46183C9.18917 2.37516 7.295 0.833496 5.20833 0.833496C2.33667 0.833496 0 3.17016 0 6.04183C0 11.6752 8.12833 17.7668 9.7575 18.9302L10 19.1035L10.2425 18.9302C11.8725 17.7668 20 11.6743 20 6.04183C20 3.17016 17.6633 0.833496 14.7917 0.833496ZM10 18.0777C5.71583 14.9652 0.833333 10.0185 0.833333 6.04183C0.833333 3.62933 2.79583 1.66683 5.20833 1.66683C7.49833 1.66683 9.58333 4.05016 9.58333 6.66683H10.4167C10.4167 4.05016 12.5017 1.66683 14.7917 1.66683C17.2042 1.66683 19.1667 3.62933 19.1667 6.04183C19.1667 10.0185 14.2842 14.9652 10 18.0777Z" fill="currentColor"/></g><defs><clipPath id="clip0_fav"><rect width="20" height="20" fill="white"/></clipPath></defs></svg>
+              <svg class="heart-filled" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><g clip-path="url(#clip1_fav)"><path d="M14.7917 0.833496C12.705 0.833496 10.8108 2.376 10 4.46183C9.18917 2.37516 7.295 0.833496 5.20833 0.833496C2.33667 0.833496 0 3.17016 0 6.04183C0 11.6752 8.12833 17.7668 9.7575 18.9302L10 19.1035L10.2425 18.9302C11.8725 17.7668 20 11.6743 20 6.04183C20 3.17016 17.6633 0.833496 14.7917 0.833496Z" fill="#e74c3c"/></g><defs><clipPath id="clip1_fav"><rect width="20" height="20" fill="white"/></clipPath></defs></svg>
+            </button>
+            <button class="icon-btn share-btn" onclick="shareProduct()" title="${t.shareProduct}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15.625 12.25C14.383 12.25 13.3075 12.9318 12.721 13.9338L7.348 11.563C7.59625 11.0935 7.75 10.567 7.75 9.99925C7.75 9.4315 7.59625 8.90575 7.348 8.4355L12.721 6.06475C13.3068 7.06675 14.3822 7.7485 15.625 7.7485C17.4858 7.7485 19 6.23425 19 4.3735C19 2.51275 17.4858 1 15.625 1C13.7642 1 12.25 2.51425 12.25 4.375C12.25 4.72675 12.319 5.05975 12.4195 5.37925L6.91825 7.80625C6.29875 7.08925 5.39425 6.625 4.375 6.625C2.51425 6.625 1 8.13925 1 10C1 11.8608 2.51425 13.375 4.375 13.375C5.395 13.375 6.2995 12.9108 6.91825 12.1938L12.4195 14.6207C12.319 14.9402 12.25 15.2732 12.25 15.625C12.25 17.4858 13.7642 19 15.625 19C17.4858 19 19 17.4858 19 15.625C19 13.7642 17.4858 12.25 15.625 12.25ZM15.625 1.75C17.0725 1.75 18.25 2.9275 18.25 4.375C18.25 5.8225 17.0725 7 15.625 7C14.1775 7 13 5.8225 13 4.375C13 2.9275 14.1775 1.75 15.625 1.75ZM4.375 12.625C2.9275 12.625 1.75 11.4475 1.75 10C1.75 8.5525 2.9275 7.375 4.375 7.375C5.8225 7.375 7 8.5525 7 10C7 11.4475 5.8225 12.625 4.375 12.625ZM15.625 18.25C14.1775 18.25 13 17.0725 13 15.625C13 14.1775 14.1775 13 15.625 13C17.0725 13 18.25 14.1775 18.25 15.625C18.25 17.0725 17.0725 18.25 15.625 18.25Z" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+        ${product.brand ? '<div class="product-brand">' + product.brand + '</div>' : ''}
         ${showPrice ? `
         <div class="product-price" id="product-price-display">
           ${hasVariantPriceRange
@@ -4718,6 +5901,9 @@ function renderProductDetail(container, product, t) {
   if (hasVariants) {
     initVariantSelection(product, t);
   }
+
+  // Check if product is already favorited
+  checkFavoriteStatus(product.id);
 }
 
 function changeMainImage(thumb, src) {
@@ -4727,6 +5913,177 @@ function changeMainImage(thumb, src) {
   // Update active thumb
   document.querySelectorAll('.product-gallery-thumb').forEach(t => t.classList.remove('active'));
   thumb.classList.add('active');
+}
+
+function _zappyProductToast(message) {
+  var existing = document.querySelector('.zappy-product-toast');
+  if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.className = 'zappy-product-toast';
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;z-index:10000;font-size:14px;opacity:0;transition:opacity 0.3s;';
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.style.opacity = '1'; }, 10);
+  setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 300); }, 3000);
+}
+
+function toggleFavorite(productId) {
+  var wId = window.ZAPPY_WEBSITE_ID;
+  var tokenKey = 'zappy_customer_token_' + wId;
+  var token = localStorage.getItem(tokenKey);
+  var btn = document.getElementById('favorite-btn');
+  if (!btn) return;
+
+  if (!token) {
+    var loginUrl = '/login';
+    var currentUrl = window.location.href;
+    var currentPath = window.location.pathname + window.location.search;
+    if (currentUrl.includes('/api/website/preview')) {
+      var isFullscreen = currentUrl.includes('preview-fullscreen');
+      var previewType = isFullscreen ? 'preview-fullscreen' : 'preview';
+      var pageParam = new URLSearchParams(window.location.search).get('page') || '/';
+      sessionStorage.setItem('zappy_login_return', pageParam);
+      loginUrl = '/api/website/' + previewType + '/' + wId + '?page=' + encodeURIComponent('/login');
+    } else {
+      sessionStorage.setItem('zappy_login_return', currentPath);
+    }
+    _zappyProductToast('Log in to save favorites');
+    setTimeout(function() { window.location.href = loginUrl; }, 1200);
+    return;
+  }
+
+  var isActive = btn.classList.contains('active');
+  var apiBase = window.ZAPPY_API_BASE || '';
+
+  if (isActive) {
+    btn.classList.remove('active');
+    fetch(apiBase + '/api/ecommerce/customers/me/favorites/' + productId + '?websiteId=' + wId, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) {
+      if (r.ok) _zappyProductToast('Removed from favorites');
+    }).catch(function() {
+      btn.classList.add('active');
+    });
+  } else {
+    btn.classList.add('active');
+    fetch(apiBase + '/api/ecommerce/customers/me/favorites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ websiteId: wId, productId: productId })
+    }).then(function(r) {
+      if (r.ok) _zappyProductToast('Added to favorites');
+    }).catch(function() {
+      btn.classList.remove('active');
+    });
+  }
+}
+
+function toggleCardFavorite(btn, productId) {
+  var wId = window.ZAPPY_WEBSITE_ID;
+  var tokenKey = 'zappy_customer_token_' + wId;
+  var token = localStorage.getItem(tokenKey);
+
+  if (!token) {
+    _zappyProductToast('Log in to save favorites');
+    var loginUrl = '/login';
+    var currentUrl = window.location.href;
+    if (currentUrl.includes('/api/website/preview')) {
+      var isFullscreen = currentUrl.includes('preview-fullscreen');
+      var previewType = isFullscreen ? 'preview-fullscreen' : 'preview';
+      loginUrl = '/api/website/' + previewType + '/' + wId + '?page=' + encodeURIComponent('/login');
+    }
+    setTimeout(function() { window.location.href = loginUrl; }, 1200);
+    return;
+  }
+
+  var isActive = btn.classList.contains('active');
+  var apiBase = window.ZAPPY_API_BASE || '';
+
+  if (isActive) {
+    btn.classList.remove('active');
+    fetch(apiBase + '/api/ecommerce/customers/me/favorites/' + productId + '?websiteId=' + wId, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) {
+      if (r.ok) {
+        _zappyProductToast('Removed from favorites');
+        document.querySelectorAll('.card-favorite-btn[data-product-id="' + productId + '"]').forEach(function(b) { b.classList.remove('active'); });
+        var detailBtn = document.getElementById('favorite-btn');
+        if (detailBtn) detailBtn.classList.remove('active');
+      }
+    }).catch(function() { btn.classList.add('active'); });
+  } else {
+    btn.classList.add('active');
+    fetch(apiBase + '/api/ecommerce/customers/me/favorites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ websiteId: wId, productId: productId })
+    }).then(function(r) {
+      if (r.ok) {
+        _zappyProductToast('Added to favorites');
+        document.querySelectorAll('.card-favorite-btn[data-product-id="' + productId + '"]').forEach(function(b) { b.classList.add('active'); });
+        var detailBtn = document.getElementById('favorite-btn');
+        if (detailBtn) detailBtn.classList.add('active');
+      }
+    }).catch(function() { btn.classList.remove('active'); });
+  }
+}
+
+function _syncCardFavorites() {
+  var wId = window.ZAPPY_WEBSITE_ID;
+  var tokenKey = 'zappy_customer_token_' + wId;
+  var token = localStorage.getItem(tokenKey);
+  if (!token) return;
+  var apiBase = window.ZAPPY_API_BASE || '';
+  fetch(apiBase + '/api/ecommerce/customers/me/favorites?websiteId=' + wId, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      var favIds = (data.favorites || data || []).map(function(f) { return f.product_id || f.productId || f.id; });
+      document.querySelectorAll('.card-favorite-btn').forEach(function(btn) {
+        var pid = btn.getAttribute('data-product-id');
+        if (favIds.indexOf(pid) !== -1) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }).catch(function() {});
+}
+
+function shareProduct() {
+  var url = window.location.href;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function() {
+      _zappyProductToast('Link copied!');
+    });
+  } else {
+    var input = document.createElement('input');
+    input.value = url;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    _zappyProductToast('Link copied!');
+  }
+}
+
+function checkFavoriteStatus(productId) {
+  var wId = window.ZAPPY_WEBSITE_ID;
+  var tokenKey = 'zappy_customer_token_' + wId;
+  var token = localStorage.getItem(tokenKey);
+  if (!token) return;
+
+  var btn = document.getElementById('favorite-btn');
+  if (!btn) return;
+
+  var apiBase = window.ZAPPY_API_BASE || '';
+  fetch(apiBase + '/api/ecommerce/customers/me/favorites/' + productId + '?websiteId=' + wId, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.data && data.data.isFavorited) {
+        btn.classList.add('active');
+      }
+    }).catch(function() {});
 }
 
 function adjustQuantity(delta) {
@@ -5008,6 +6365,7 @@ function updateVariantUI(variant, product, t, selectedAttributes) {
   const stockDisplay = document.getElementById('product-stock-display');
   const skuDisplay = document.getElementById('product-sku-display');
   const addToCartBtn = document.getElementById('add-to-cart-btn');
+  const mainImage = document.getElementById('product-main-image');
   
   const basePrice = window.productBasePrice;
   const originalPrice = window.productOriginalPrice;
@@ -5015,6 +6373,11 @@ function updateVariantUI(variant, product, t, selectedAttributes) {
   const hasVariantPriceRange = window.productHasVariantPriceRange;
   const variantMinPrice = window.productVariantMinPrice;
   const startingAtLabel = getEcomText('startingAt', t.startingAt || 'Starting at');
+  
+  // Store original main image on first call
+  if (mainImage && !window._originalMainImageSrc) {
+    window._originalMainImageSrc = mainImage.src;
+  }
   
   if (variant) {
     // Use variant's own price if set, otherwise fall back to base price
@@ -5056,10 +6419,25 @@ function updateVariantUI(variant, product, t, selectedAttributes) {
       addToCartBtn.style.cursor = variantInStock ? 'pointer' : 'not-allowed';
     }
     
+    // Update main image if variant has a specific image
+    if (mainImage && variant.image) {
+      var variantImgSrc = variant.image;
+      if (window.resolveProductImageUrl) {
+        variantImgSrc = window.resolveProductImageUrl(variant.image);
+      }
+      mainImage.src = variantImgSrc;
+    } else if (mainImage && window._originalMainImageSrc) {
+      mainImage.src = window._originalMainImageSrc;
+    }
+    
     // Store selected variant
     window.selectedVariant = variant;
   } else {
     // No matching variant found
+    // Restore original image when no variant is matched
+    if (mainImage && window._originalMainImageSrc) {
+      mainImage.src = window._originalMainImageSrc;
+    }
     // Check if all attribute groups have a selection - if so, this is an unavailable combination
     var allGroupsSelected = false;
     var variantGroups = document.querySelectorAll('.variant-group');
@@ -5215,359 +6593,6 @@ async function loadRelatedProducts(currentProduct, t) {
 }
 /* ==ZAPPY E-COMMERCE JS END== */
 
-/* Cookie Consent */
-
-// Helper function to check cookie consent
-function hasConsentFor(category) {
-  if (typeof window.CookieConsent === 'undefined') {
-    return false; // Default to no consent if cookie consent not loaded
-  }
-  
-  return window.CookieConsent.validConsent(category);
-}
-
-// Helper function to execute code only with consent
-function withConsent(category, callback) {
-  if (hasConsentFor(category)) {
-    callback();
-  } else {
-    console.log(`[WARNING] Skipping ${category} code - no user consent`);
-  }
-}
-
-// Cookie Consent Initialization
-
-(function() {
-  'use strict';
-  
-  let initAttempts = 0;
-  const maxAttempts = 50; // 5 seconds max wait
-  
-  // Wait for DOM and vanilla-cookieconsent to be ready
-  function initCookieConsent() {
-    initAttempts++;
-    
-    
-    if (typeof window.CookieConsent === 'undefined') {
-      if (initAttempts < maxAttempts) {
-        setTimeout(initCookieConsent, 100);
-      } else {
-      }
-      return;
-    }
-
-    const cc = window.CookieConsent;
-    
-    
-    // Initialize cookie consent
-    try {
-      cc.run({
-  "autoShow": true,
-  "mode": "opt-in",
-  "revision": 0,
-  "categories": {
-    "necessary": {
-      "enabled": true,
-      "readOnly": true
-    },
-    "analytics": {
-      "enabled": false,
-      "readOnly": false,
-      "autoClear": {
-        "cookies": [
-          {
-            "name": "_ga"
-          },
-          {
-            "name": "_ga_*"
-          },
-          {
-            "name": "_gid"
-          },
-          {
-            "name": "_gat"
-          }
-        ]
-      }
-    },
-    "marketing": {
-      "enabled": false,
-      "readOnly": false,
-      "autoClear": {
-        "cookies": [
-          {
-            "name": "_fbp"
-          },
-          {
-            "name": "_fbc"
-          },
-          {
-            "name": "fr"
-          }
-        ]
-      }
-    }
-  },
-  "language": {
-    "default": "en",
-    "translations": {
-      "en": {
-        "consentModal": {
-          "title": "We use cookies 🍪",
-          "description": "MeraGhara uses cookies to enhance your experience, analyze site usage, and assist in our marketing efforts. You can manage your preferences anytime.",
-          "acceptAllBtn": "Accept All",
-          "acceptNecessaryBtn": "Accept Necessary",
-          "showPreferencesBtn": "Manage Preferences",
-          "footer": "<a href=\"#privacy-policy\">Privacy Policy</a> | <a href=\"#terms-conditions\">Terms & Conditions</a>"
-        },
-        "preferencesModal": {
-          "title": "Cookie Preferences",
-          "acceptAllBtn": "Accept All",
-          "acceptNecessaryBtn": "Accept Necessary",
-          "savePreferencesBtn": "Save Preferences",
-          "closeIconLabel": "Close",
-          "sections": [
-            {
-              "title": "Essential Cookies",
-              "description": "These cookies are necessary for the website to function and cannot be disabled.",
-              "linkedCategory": "necessary"
-            },
-            {
-              "title": "Analytics Cookies",
-              "description": "These cookies help us understand how visitors interact with our website.",
-              "linkedCategory": "analytics"
-            },
-            {
-              "title": "Marketing Cookies",
-              "description": "These cookies are used to deliver personalized advertisements.",
-              "linkedCategory": "marketing"
-            }
-          ]
-        }
-      }
-    }
-  },
-  "guiOptions": {
-    "consentModal": {
-      "layout": "box",
-      "position": "bottom right",
-      "equalWeightButtons": true,
-      "flipButtons": false
-    },
-    "preferencesModal": {
-      "layout": "box",
-      "equalWeightButtons": true,
-      "flipButtons": false
-    }
-  }
-});
-      
-      // Google Consent Mode v2 integration
-      // Update consent state based on accepted cookie categories
-      function updateGoogleConsentMode() {
-        if (typeof gtag !== 'function') {
-          // Define gtag if not already defined (needed for consent updates)
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = function(){dataLayer.push(arguments);};
-        }
-        
-        var analyticsAccepted = cc.acceptedCategory('analytics');
-        var marketingAccepted = cc.acceptedCategory('marketing');
-        
-        gtag('consent', 'update', {
-          'analytics_storage': analyticsAccepted ? 'granted' : 'denied',
-          'ad_storage': marketingAccepted ? 'granted' : 'denied',
-          'ad_user_data': marketingAccepted ? 'granted' : 'denied',
-          'ad_personalization': marketingAccepted ? 'granted' : 'denied'
-        });
-      }
-      
-      // Update consent on initial load (if user previously accepted)
-      updateGoogleConsentMode();
-      
-      // Handle consent changes via onChange callback
-      if (typeof cc.onChange === 'function') {
-        cc.onChange(function(cookie, changed_preferences) {
-          updateGoogleConsentMode();
-        });
-      }
-
-      // Note: Cookie Preferences button removed per marketing guidelines
-      // Footer should be clean and minimal - users can manage cookies via banner
-    } catch (error) {
-    }
-  }
-
-  // Initialize when DOM is ready - multiple approaches for reliability
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCookieConsent);
-    // Backup timeout in case DOMContentLoaded doesn't fire
-    setTimeout(initCookieConsent, 1000);
-  } else if (document.readyState === 'interactive' || document.readyState === 'complete') {
-    initCookieConsent();
-  } else {
-    // Fallback - try after a short delay
-    setTimeout(initCookieConsent, 500);
-  }
-  
-  // Additional fallback - try after page load
-  if (typeof window !== 'undefined') {
-    if (window.addEventListener) {
-      window.addEventListener('load', initCookieConsent, { once: true });
-    }
-  }
-})();
-
-/* Accessibility Features */
-
-/* Mickidum Accessibility Toolbar Initialization - Zappy Style */
-
-window.onload = function() {
-    
-    try {
-        window.micAccessTool = new MicAccessTool({
-            buttonPosition: 'left', // Position on left side
-            forceLang: 'en-US', // Force language
-            icon: {
-                position: {
-                    bottom: { size: 50, units: 'px' },
-                    left: { size: 20, units: 'px' },
-                    type: 'fixed'
-                },
-                backgroundColor: 'transparent', // Transparent to allow CSS styling
-                color: 'transparent', // Let CSS handle coloring
-                img: 'accessible',
-                circular: false // Square button for consistent styling
-            },
-            menu: {
-                dimensions: {
-                    width: { size: 300, units: 'px' },
-                    height: { size: 'auto', units: 'px' }
-                }
-            }
-        });
-        
-    } catch (error) {
-    }
-    
-    // Keyboard shortcut handler: ALT+A (Option+A on Mac) to toggle accessibility widget visibility (desktop only)
-    document.addEventListener('keydown', function(event) {
-        // Check if ALT+A is pressed (ALT on Windows/Linux, Option on Mac)
-        var isAltOrOption = event.altKey;
-        // Use event.code for reliable physical key detection (works regardless of Option key character output)
-        var isAKey = event.code === 'KeyA' || event.keyCode === 65 || event.which === 65 || 
-                      (event.key && (event.key.toLowerCase() === 'a' || event.key === 'å' || event.key === 'Å'));
-        
-        if (isAltOrOption && isAKey) {
-            // Only work on desktop (screen width > 768px)
-            if (window.innerWidth > 768) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Toggle visibility class on body
-                var isVisible = document.body.classList.contains('accessibility-widget-visible');
-                
-                if (isVisible) {
-                    // Hide the widget
-                    document.body.classList.remove('accessibility-widget-visible');
-                } else {
-                    // Show the widget
-                    document.body.classList.add('accessibility-widget-visible');
-                    
-                    // After a short delay, click the button to open the menu
-                    setTimeout(function() {
-                        var accessButton = document.getElementById('mic-access-tool-general-button');
-                        if (accessButton) {
-                            accessButton.click();
-                        }
-                    }, 200);
-                }
-            }
-        }
-    }, true);
-};
-
-
-// Zappy Contact Form API Integration (Fallback)
-(function() {
-    if (window.zappyContactFormLoaded) {
-        console.log('📧 Zappy contact form already loaded');
-        return;
-    }
-    window.zappyContactFormLoaded = true;
-
-    function initContactFormIntegration() {
-        console.log('📧 Zappy: Initializing contact form API integration...');
-
-        // Find the contact form (try multiple selectors for flexibility)
-        const contactForm = document.querySelector('.contact-form') || 
-                           document.querySelector('form[action*="contact"]') ||
-                           document.querySelector('form#contact') ||
-                           document.querySelector('form#contactForm') ||
-                           document.getElementById('contactForm') ||
-                           document.querySelector('section.contact form') ||
-                           document.querySelector('section#contact form') ||
-                           document.querySelector('form');
-        
-        if (!contactForm) {
-            console.log('⚠️ Zappy: No contact form found on page');
-            return;
-        }
-        
-        console.log('✅ Zappy: Contact form found:', contactForm.className || contactForm.id || 'unnamed form');
-
-        // Store original submit handler if exists
-        const originalOnSubmit = contactForm.onsubmit;
-
-    // Add Zappy API integration using capture phase to run before other handlers
-    contactForm.addEventListener('submit', async function(e) {
-        // Get form data
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-
-        // Send to Zappy backend API (don't prevent default, let other handlers run)
-        try {
-            console.log('📧 Zappy: Sending contact form to backend API...');
-            const response = await fetch('https://api.zappy5.com/api/email/contact-form', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    websiteId: 'fc655920-b634-4e2c-b4b5-fd43e4e828bf',
-                    name: data.name || '',
-                    email: data.email || '',
-                    subject: data.subject || 'Contact Form Submission',
-                    message: data.message || '',
-                    phone: data.phone || null
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                console.log('✅ Zappy: Contact form data sent successfully to backend');
-            } else {
-                console.log('⚠️ Zappy: Backend returned error:', result.error);
-            }
-        } catch (error) {
-            console.error('❌ Zappy: Failed to send to backend API:', error);
-            // Don't break the existing form submission
-        }
-        }, true); // Use capture phase to run before other handlers
-
-        console.log('✅ Zappy: Contact form API integration initialized');
-    } // End of initContactFormIntegration
-    
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initContactFormIntegration);
-    } else {
-        // DOM is already ready, initialize immediately
-        initContactFormIntegration();
-    }
-})();
-
 
 /* ZAPPY_PUBLISHED_LIGHTBOX_RUNTIME */
 (function(){
@@ -5672,8 +6697,31 @@ window.onload = function() {
       } catch (e) {}
     }
 
+    function ensureLightboxCss(){
+      try {
+        var head = document.head || document.querySelector('head');
+        if (!head || head.querySelector('style[data-zappy-image-lightbox="true"]')) return;
+        var s = document.createElement('style');
+        s.setAttribute('data-zappy-image-lightbox','true');
+        s.textContent =
+          '.zappy-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;padding:24px;}'+
+          '.zappy-lightbox-content{position:relative;max-width:min(1100px,92vw);max-height:92vh;}'+
+          '.zappy-lightbox-content img{max-width:92vw;max-height:92vh;display:block;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.45);}'+
+          '.zappy-lightbox-close{position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:999px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;}'+
+          '.zappy-lightbox-backdrop{position:absolute;inset:0;display:block;cursor:pointer;}'+
+          'input.zappy-lightbox-toggle{position:absolute;opacity:0;pointer-events:none;}'+
+          'label.zappy-lightbox-trigger{display:contents;}'+
+          'label.zappy-lightbox-trigger{cursor:zoom-in;}'+
+          'label.zappy-lightbox-trigger [data-zappy-zoom-wrapper="true"],'+
+          'label.zappy-lightbox-trigger img{cursor:zoom-in !important;}'+
+          'input.zappy-lightbox-toggle:checked + label.zappy-lightbox-trigger + .zappy-lightbox{display:flex;}';
+        head.appendChild(s);
+      } catch(e){}
+    }
+
     function initZappyPublishedLightboxes(){
       try {
+        ensureLightboxCss();
         // Repair orphaned labels (label has for=toggleId but input is missing)
         var orphanLabels = document.querySelectorAll('label.zappy-lightbox-trigger[for^="zappy-lightbox-toggle-"]');
         for (var i=0;i<orphanLabels.length;i++){
@@ -5839,6 +6887,94 @@ window.onload = function() {
   } catch (eOuter) {}
 })();
 /* END ZAPPY_PUBLISHED_ZOOM_WRAPPER_RUNTIME */
+
+
+/* ZAPPY_MOBILE_MENU_TOGGLE */
+(function(){
+  try {
+    if (window.__zappyMobileMenuToggleInit) return;
+    window.__zappyMobileMenuToggleInit = true;
+
+    function initMobileToggle() {
+      var toggle = document.querySelector('.mobile-toggle, #mobileToggle');
+      var navMenu = document.querySelector('#navMenu, .nav-menu, .navbar-menu');
+      if (!toggle || !navMenu) return;
+
+      // Skip if this toggle already has a click handler from the site's own JS
+      if (toggle.__zappyMobileToggleBound) return;
+      toggle.__zappyMobileToggleBound = true;
+
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var hamburgerIcon = toggle.querySelector('.hamburger-icon');
+        var closeIcon = toggle.querySelector('.close-icon');
+        var isOpen = navMenu.classList.contains('active') || navMenu.style.display === 'block';
+
+        if (isOpen) {
+          navMenu.classList.remove('active');
+          navMenu.style.display = '';
+          if (hamburgerIcon) hamburgerIcon.style.setProperty('display', 'block', 'important');
+          if (closeIcon) closeIcon.style.setProperty('display', 'none', 'important');
+          document.body.style.overflow = '';
+        } else {
+          navMenu.classList.add('active');
+          navMenu.style.display = 'block';
+          if (hamburgerIcon) hamburgerIcon.style.setProperty('display', 'none', 'important');
+          if (closeIcon) closeIcon.style.setProperty('display', 'block', 'important');
+          document.body.style.overflow = 'hidden';
+        }
+      }, true);
+
+      // Close on clicking outside
+      document.addEventListener('click', function(e) {
+        if (!navMenu.classList.contains('active')) return;
+        if (toggle.contains(e.target) || navMenu.contains(e.target)) return;
+        navMenu.classList.remove('active');
+        navMenu.style.display = '';
+        var hi = toggle.querySelector('.hamburger-icon');
+        var ci = toggle.querySelector('.close-icon');
+        if (hi) hi.style.setProperty('display', 'block', 'important');
+        if (ci) ci.style.setProperty('display', 'none', 'important');
+        document.body.style.overflow = '';
+      });
+
+      // Close on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+          navMenu.classList.remove('active');
+          navMenu.style.display = '';
+          var hi = toggle.querySelector('.hamburger-icon');
+          var ci = toggle.querySelector('.close-icon');
+          if (hi) hi.style.setProperty('display', 'block', 'important');
+          if (ci) ci.style.setProperty('display', 'none', 'important');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close when clicking a nav link (navigating)
+      navMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          navMenu.classList.remove('active');
+          navMenu.style.display = '';
+          var hi = toggle.querySelector('.hamburger-icon');
+          var ci = toggle.querySelector('.close-icon');
+          if (hi) hi.style.setProperty('display', 'block', 'important');
+          if (ci) ci.style.setProperty('display', 'none', 'important');
+          document.body.style.overflow = '';
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileToggle, { once: true });
+    } else {
+      initMobileToggle();
+    }
+  } catch (e) {}
+})();
+/* END ZAPPY_MOBILE_MENU_TOGGLE */
 
 
 /* ZAPPY_FAQ_ACCORDION_TOGGLE */
